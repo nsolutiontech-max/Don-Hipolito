@@ -3,10 +3,10 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Hipólito · Control de Stock",
+  title: "Don Hipólito · Control de Stock",
   description: "Conteo diario de insumos del restaurante",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Hipólito Stock", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Don Hipólito Stock", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
         <header className="sticky top-0 z-10 bg-emerald-800 text-white">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-            <span className="text-lg font-bold">Hipólito · Stock</span>
+            <span className="text-lg font-bold">Don Hipólito · Stock</span>
             <nav className="flex gap-1 text-sm font-medium">
               {NAV.map((n) => (
                 <Link key={n.href} href={n.href} className="rounded px-2 py-1 hover:bg-emerald-700">

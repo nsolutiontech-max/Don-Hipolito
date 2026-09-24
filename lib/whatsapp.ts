@@ -24,7 +24,7 @@ export function armarMensajePedido(
   const bloques = [...porCategoria.values()].map(
     (g) => `*${g.categoria}*\n${g.lineas.join("\n")}`,
   );
-  return `*PEDIDO HIPÓLITO ${fecha} ${turno}*\n\n${bloques.join("\n\n")}`;
+  return `*PEDIDO DON HIPÓLITO ${fecha} ${turno}*\n\n${bloques.join("\n\n")}`;
 }
 
 export function whatsappUrl(mensaje: string): string {

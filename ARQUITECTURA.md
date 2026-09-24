@@ -1,4 +1,4 @@
-# Hipólito · Control de Stock — Arquitectura MVP y Plan de Fases
+# Don Hipólito · Control de Stock — Arquitectura MVP y Plan de Fases
 
 > Reemplazo digital de la planilla en papel (fotos `imagenes/1.jpeg`, `imagenes/2.jpeg`): conteo diario por categoría, stock actual y cantidad a pedir, con responsable y fecha por turno.
 

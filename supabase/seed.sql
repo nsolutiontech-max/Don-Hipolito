@@ -7,9 +7,9 @@ insert into categorias (nombre, orden) values
   ('Especias', 4), ('Masa', 5), ('Harinas', 6)
 on conflict (nombre) do nothing;
 
--- Responsables de ejemplo (ajustar a los nombres reales del equipo)
+-- Responsables del equipo
 insert into responsables (nombre) values
-  ('Nadia'), ('Maru'), ('Cocina')
+  ('Nicolas'), ('Namir'), ('Leo')
 on conflict (nombre) do nothing;
 
 -- Productos: (categoria, nombre, unidad, min, ideal)

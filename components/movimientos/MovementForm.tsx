@@ -90,7 +90,7 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
           <select
             value={productoId}
             onChange={(e) => setProductoId(e.target.value)}
-            className="h-12 rounded-lg border border-zinc-300 bg-white px-3 text-base"
+            className="h-12 rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900"
           >
             <option value="" disabled>Elegir producto…</option>
             {catalogo.categorias.map((c) => (
@@ -115,7 +115,7 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
               placeholder="0"
               value={cantidadTxt}
               onChange={(e) => setCantidadTxt(e.target.value)}
-              className="h-12 rounded-lg border border-zinc-300 px-3 text-center text-lg font-semibold tabular-nums"
+              className="h-12 rounded-lg border border-zinc-300 px-3 text-center text-lg font-semibold text-zinc-900 tabular-nums placeholder:text-zinc-400"
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -123,7 +123,7 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
             <select
               value={responsableId}
               onChange={(e) => setResponsableId(e.target.value)}
-              className="h-12 rounded-lg border border-zinc-300 bg-white px-2 text-base"
+              className="h-12 rounded-lg border border-zinc-300 bg-white px-2 text-base text-zinc-900"
             >
               <option value="">—</option>
               {catalogo.responsables.map((r) => (
@@ -140,7 +140,7 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
             placeholder={tipo === "INGRESO" ? "Ej: Proveedor Don Hugo" : "Ej: Merma cocina"}
-            className="h-12 rounded-lg border border-zinc-300 px-3 text-base"
+            className="h-12 rounded-lg border border-zinc-300 px-3 text-base text-zinc-900 placeholder:text-zinc-400"
           />
         </label>
         {aviso && <p className="mt-3 rounded-lg bg-zinc-100 px-3 py-2 text-sm">{aviso}</p>}

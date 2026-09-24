@@ -55,7 +55,7 @@ export function CategoryAccordion({
               placeholder="Buscar…"
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
-              className="mt-2 h-10 w-full rounded-lg border border-zinc-200 px-3 text-sm"
+              className="mt-2 h-10 w-full rounded-lg border border-zinc-200 px-3 text-sm text-zinc-900 placeholder:text-zinc-400"
             />
           )}
           {visibles.map((p) => (

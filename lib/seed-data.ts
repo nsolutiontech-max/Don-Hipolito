@@ -93,7 +93,7 @@ export const PRODUCTOS_FALLBACK: Producto[] = FILAS.map(
 );
 
 export const RESPONSABLES_FALLBACK: Responsable[] = [
-  { id: "resp-1", nombre: "Nadia" },
-  { id: "resp-2", nombre: "Maru" },
-  { id: "resp-3", nombre: "Cocina" },
+  { id: "resp-nicolas", nombre: "Nicolas" },
+  { id: "resp-namir", nombre: "Namir" },
+  { id: "resp-leo", nombre: "Leo" },
 ];

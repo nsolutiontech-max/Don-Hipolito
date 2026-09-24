@@ -1,6 +1,6 @@
 {
-  "name": "Hipólito · Control de Stock",
-  "short_name": "Hipólito Stock",
+  "name": "Don Hipólito · Control de Stock",
+  "short_name": "Don Hipólito",
   "description": "Conteo diario de insumos del restaurante",
   "start_url": "/conteo/hoy",
   "scope": "/",

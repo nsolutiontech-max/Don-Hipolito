@@ -46,7 +46,7 @@ export function StockInput({ label, value, sugerido, onChange }: Props) {
         onKeyDown={(e) => {
           if (e.key === "Enter") (e.target as HTMLInputElement).blur();
         }}
-        className={`h-12 w-full rounded-lg border px-3 text-center text-lg font-semibold tabular-nums ${
+        className={`h-12 w-full rounded-lg border px-3 text-center text-lg font-semibold text-zinc-900 tabular-nums placeholder:text-zinc-400 ${
           invalido
             ? "border-red-500 bg-red-50"
             : "border-zinc-300 bg-white focus:border-emerald-600"

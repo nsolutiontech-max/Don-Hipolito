@@ -45,7 +45,7 @@ export function CountHeader({
         <select
           value={responsableId ?? ""}
           onChange={(e) => onResponsable(e.target.value)}
-          className="h-12 rounded-lg border border-zinc-300 bg-white px-3 text-base"
+          className="h-12 rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900"
         >
           <option value="" disabled>
             Elegir responsable…
