@@ -14,13 +14,7 @@ type BorradorPedido = {
   items: DetalleConteo[];
 };
 
-export function PedidosClient({
-  catalogo,
-  usaSupabase,
-}: {
-  catalogo: Catalogo;
-  usaSupabase: boolean;
-}) {
+export function PedidosClient({ catalogo }: { catalogo: Catalogo }) {
   const [borrador] = useState<BorradorPedido | null>(() => {
     try {
       if (typeof window === "undefined") return null;
@@ -56,10 +50,6 @@ export function PedidosClient({
 
   const onConfirmar = async () => {
     if (!borrador) return;
-    if (!usaSupabase) {
-      setAviso("Pedido confirmado en este dispositivo (modo demo).");
-      return;
-    }
     const r = await guardarPedido(
       borrador.fecha,
       items.map((i) => ({ producto_id: i.producto.id, cantidad: i.cantidad })),

@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  exigirSesion,
   getDetalles,
   getOrCreateInventario,
   guardarDetalles,
@@ -12,17 +13,19 @@ export async function cargarDetalles(
   fecha: string,
   turno: Turno,
 ): Promise<DetalleConteo[]> {
+  await exigirSesion();
   return getDetalles(fecha, turno);
 }
 
 export async function guardarConteo(
   fecha: string,
   turno: Turno,
-  responsableId: string | null,
   detalles: DetalleConteo[],
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const inventarioId = await getOrCreateInventario(fecha, turno, responsableId);
+    // El responsable siempre sale de la sesión, nunca del cliente.
+    const sesion = await exigirSesion();
+    const inventarioId = await getOrCreateInventario(fecha, turno, sesion.responsable_id);
     await guardarDetalles(inventarioId, detalles);
     return { ok: true };
   } catch (e) {

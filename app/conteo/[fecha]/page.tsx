@@ -1,12 +1,21 @@
+import { redirect } from "next/navigation";
 import { DailyCountClient } from "@/components/conteo/DailyCountClient";
-import { fechaHoy, getCatalogo, getDetalles, type Turno } from "@/lib/data";
-import { supabaseConfigurado } from "@/lib/supabase/server";
+import { exigirSesion, fechaHoy, getCatalogo, getDetalles, type Turno } from "@/lib/data";
 
 export default async function ConteoPage({
   params,
 }: {
   params: Promise<{ fecha: string }>;
 }) {
+  const sesion = await exigirSesion().catch(() => null);
+  if (!sesion) redirect("/login");
+  if (!sesion.responsable_id) {
+    return (
+      <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+        Tu usuario no tiene responsable asignado. Pedile al dueño que lo configure.
+      </p>
+    );
+  }
   const { fecha: param } = await params;
   const fecha = param === "hoy" ? fechaHoy() : param;
   // El turno por defecto es NOCHE; los detalles se recargan al cambiarlo en el cliente.
@@ -20,7 +29,8 @@ export default async function ConteoPage({
       fecha={fecha}
       catalogo={catalogo}
       detallesIniciales={detalles}
-      usaSupabase={supabaseConfigurado}
+      responsableId={sesion.responsable_id}
+      responsableNombre={sesion.responsable_nombre ?? sesion.email}
     />
   );
 }

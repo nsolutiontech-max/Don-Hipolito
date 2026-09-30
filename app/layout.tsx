@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { LogoutButton } from "@/components/auth/LogoutButton";
+import { getSesionUsuario } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Don Hipólito · Control de Stock",
@@ -22,21 +24,43 @@ const NAV = [
   { href: "/pedidos", label: "Pedidos" },
 ];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const sesion = await getSesionUsuario();
+
+  // Sin sesión: solo la pantalla de login, sin shell ni navegación.
+  if (!sesion) {
+    return (
+      <html lang="es" className="h-full">
+        <body className="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
+          <main className="mx-auto w-full max-w-2xl px-4 py-4">{children}</main>
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html lang="es" className="h-full">
       <body className="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
         <header className="sticky top-0 z-10 bg-emerald-800 text-white">
           <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
             <span className="text-lg font-bold">Don Hipólito · Stock</span>
-            <nav className="flex gap-1 text-sm font-medium">
+            <nav className="flex items-center gap-1 text-sm font-medium">
               {NAV.map((n) => (
                 <Link key={n.href} href={n.href} className="rounded px-2 py-1 hover:bg-emerald-700">
                   {n.label}
                 </Link>
               ))}
+              {sesion.rol === "DUEÑO" && (
+                <Link href="/admin" className="rounded bg-amber-500 px-2 py-1 text-emerald-950">
+                  Admin
+                </Link>
+              )}
+              <LogoutButton />
             </nav>
           </div>
+          <p className="mx-auto max-w-2xl px-4 pb-2 text-xs text-emerald-100">
+            {sesion.responsable_nombre ?? sesion.email} · {sesion.rol === "DUEÑO" ? "Dueño" : "Cocina"}
+          </p>
         </header>
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-4">{children}</main>
       </body>

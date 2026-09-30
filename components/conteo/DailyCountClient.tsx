@@ -18,7 +18,8 @@ type Props = {
   fecha: string;
   catalogo: Catalogo;
   detallesIniciales: DetalleConteo[];
-  usaSupabase: boolean;
+  responsableId: string;
+  responsableNombre: string;
 };
 
 function mapaInicial(productos: Producto[], previos: DetalleConteo[]) {
@@ -39,10 +40,15 @@ function mapaInicial(productos: Producto[], previos: DetalleConteo[]) {
   return m;
 }
 
-export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupabase }: Props) {
+export function DailyCountClient({
+  fecha,
+  catalogo,
+  detallesIniciales,
+  responsableId,
+  responsableNombre,
+}: Props) {
   const router = useRouter();
   const [turno, setTurno] = useState<Turno>("NOCHE");
-  const [responsableId, setResponsableId] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<string | null>(catalogo.categorias[0]?.id ?? null);
   const [detalles, setDetalles] = useState(() => mapaInicial(catalogo.productos, detallesIniciales));
   const [guardando, setGuardando] = useState(false);
@@ -50,19 +56,17 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
 
   const claveBorrador = `hipolito-conteo-${fecha}-${turno}`;
 
-  // Carga por turno: servidor (si hay) + borrador local encima (el borrador gana).
+  // Carga por turno: servidor + borrador local encima (el borrador gana).
   useEffect(() => {
     let vivo = true;
     (async () => {
       let servidor: DetalleConteo[] = [];
-      if (usaSupabase) {
-        try {
-          servidor = await cargarDetalles(fecha, turno);
-        } catch {
-          servidor = [];
-        }
+      try {
+        servidor = await cargarDetalles(fecha, turno);
+      } catch {
+        servidor = [];
       }
-      let borrador: { responsableId: string | null; detalles: DetalleConteo[] } | null = null;
+      let borrador: { detalles: DetalleConteo[] } | null = null;
       try {
         const raw = localStorage.getItem(claveBorrador);
         if (raw) borrador = JSON.parse(raw);
@@ -75,7 +79,6 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
       for (const d of borrador?.detalles ?? []) {
         if (d.stock_real !== null) base.set(d.producto_id, d);
       }
-      if (borrador?.responsableId) setResponsableId(borrador.responsableId);
       setDetalles(mapaInicial(catalogo.productos, [...base.values()]));
     })();
     return () => {
@@ -88,12 +91,12 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
     try {
       localStorage.setItem(
         claveBorrador,
-        JSON.stringify({ responsableId, detalles: [...detalles.values()] }),
+        JSON.stringify({ detalles: [...detalles.values()] }),
       );
     } catch {
       // almacenamiento lleno o bloqueado: el guardado principal sigue funcionando
     }
-  }, [claveBorrador, responsableId, detalles]);
+  }, [claveBorrador, detalles]);
 
   const porCategoria = useMemo(() => {
     const m = new Map<string, Producto[]>();
@@ -141,13 +144,8 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
   const onGuardar = async () => {
     setGuardando(true);
     setAviso(null);
-    const lista = [...detalles.values()];
-    if (usaSupabase) {
-      const r = await guardarConteo(fecha, turno, responsableId, lista);
-      setAviso(r.ok ? "Conteo guardado ✓" : `Error: ${r.error}`);
-    } else {
-      setAviso("Guardado en este dispositivo (borrador). Configurá Supabase para persistir en la nube.");
-    }
+    const r = await guardarConteo(fecha, turno, [...detalles.values()]);
+    setAviso(r.ok ? "Conteo guardado ✓" : `Error: ${r.error}`);
     setGuardando(false);
   };
 
@@ -168,18 +166,11 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
 
   return (
     <div className="flex flex-col gap-3 pb-4">
-      {!usaSupabase && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          Modo demo: Supabase no configurado. Completá `.env.local` (ver `.env.example`) para guardar en la nube.
-        </p>
-      )}
       <CountHeader
         fecha={fecha}
         turno={turno}
-        responsableId={responsableId}
-        responsables={catalogo.responsables}
+        responsableNombre={responsableNombre}
         onTurno={setTurno}
-        onResponsable={setResponsableId}
       />
       {aviso && (
         <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{aviso}</p>
@@ -200,7 +191,7 @@ export function DailyCountClient({ fecha, catalogo, detallesIniciales, usaSupaba
         contados={contados}
         total={catalogo.productos.length}
         guardando={guardando}
-        puedeGuardar={responsableId !== null && contados > 0}
+        puedeGuardar={contados > 0}
         onGuardar={onGuardar}
         onGenerarPedido={onGenerarPedido}
       />

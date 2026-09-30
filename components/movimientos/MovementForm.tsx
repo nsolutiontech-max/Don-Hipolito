@@ -8,25 +8,21 @@ import type { Catalogo, Movimiento } from "@/lib/data";
 type Props = {
   catalogo: Catalogo;
   recientesServidor: Movimiento[];
-  usaSupabase: boolean;
+  responsableNombre: string;
 };
 
-export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props) {
+export function MovementForm({ catalogo, recientesServidor, responsableNombre }: Props) {
   const [productoId, setProductoId] = useState("");
   const [tipo, setTipo] = useState<"INGRESO" | "EGRESO">("INGRESO");
   const [cantidadTxt, setCantidadTxt] = useState("");
   const [motivo, setMotivo] = useState("");
-  const [responsableId, setResponsableId] = useState<string>("");
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
-  const [locales, setLocales] = useState<Movimiento[]>([]);
 
   const nombreProducto = (id: string) =>
     catalogo.productos.find((p) => p.id === id)?.nombre ?? id;
   const nombreResponsable = (id: string | null) =>
     catalogo.responsables.find((r) => r.id === id)?.nombre ?? "—";
-
-  const recientes = [...locales, ...recientesServidor];
 
   const onGuardar = async () => {
     const cantidad = parsearCantidad(cantidadTxt);
@@ -35,38 +31,27 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
     if (!motivo.trim()) return setAviso("Indicá el motivo.");
     setGuardando(true);
     setAviso(null);
-    if (usaSupabase) {
-      const r = await registrarMovimiento({
-        producto_id: productoId,
-        tipo,
-        cantidad,
-        motivo,
-        responsable_id: responsableId || null,
-      });
-      setAviso(r.ok ? "Movimiento guardado ✓" : `Error: ${r.error}`);
-    } else {
-      setLocales((prev) => [
-        {
-          id: `local-${Date.now()}`,
-          producto_id: productoId,
-          tipo,
-          cantidad,
-          motivo: motivo.trim(),
-          fecha: new Date().toISOString(),
-          responsable_id: responsableId || null,
-        },
-        ...prev,
-      ]);
-      setAviso("Guardado en este dispositivo (modo demo).");
+    const r = await registrarMovimiento({
+      producto_id: productoId,
+      tipo,
+      cantidad,
+      motivo,
+    });
+    setAviso(r.ok ? "Movimiento guardado ✓" : `Error: ${r.error}`);
+    if (r.ok) {
+      setProductoId("");
+      setCantidadTxt("");
+      setMotivo("");
     }
-    setCantidadTxt("");
-    setMotivo("");
     setGuardando(false);
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-xl border border-zinc-200 bg-white p-4">
+        <p className="mb-3 text-sm">
+          Responsable: <span className="font-semibold text-zinc-900">{responsableNombre}</span>
+        </p>
         <div className="grid grid-cols-2 gap-2">
           {(["INGRESO", "EGRESO"] as const).map((t) => (
             <button
@@ -106,32 +91,17 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
             ))}
           </select>
         </label>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-zinc-500">Cantidad</span>
-            <input
-              inputMode="decimal"
-              autoComplete="off"
-              placeholder="0"
-              value={cantidadTxt}
-              onChange={(e) => setCantidadTxt(e.target.value)}
-              className="h-12 rounded-lg border border-zinc-300 px-3 text-center text-lg font-semibold text-zinc-900 tabular-nums placeholder:text-zinc-400"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-zinc-500">Responsable</span>
-            <select
-              value={responsableId}
-              onChange={(e) => setResponsableId(e.target.value)}
-              className="h-12 rounded-lg border border-zinc-300 bg-white px-2 text-base text-zinc-900"
-            >
-              <option value="">—</option>
-              {catalogo.responsables.map((r) => (
-                <option key={r.id} value={r.id}>{r.nombre}</option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <label className="mt-3 flex flex-col gap-1">
+          <span className="text-xs font-medium text-zinc-500">Cantidad</span>
+          <input
+            inputMode="decimal"
+            autoComplete="off"
+            placeholder="0"
+            value={cantidadTxt}
+            onChange={(e) => setCantidadTxt(e.target.value)}
+            className="h-12 rounded-lg border border-zinc-300 px-3 text-center text-lg font-semibold text-zinc-900 tabular-nums placeholder:text-zinc-400"
+          />
+        </label>
         <label className="mt-3 flex flex-col gap-1">
           <span className="text-xs font-medium text-zinc-500">
             Motivo {tipo === "INGRESO" ? "(proveedor)" : "(merma, rotura, etc.)"}
@@ -156,11 +126,11 @@ export function MovementForm({ catalogo, recientesServidor, usaSupabase }: Props
 
       <section className="rounded-xl border border-zinc-200 bg-white p-4">
         <h2 className="font-semibold">Últimos movimientos</h2>
-        {recientes.length === 0 && (
+        {recientesServidor.length === 0 && (
           <p className="mt-2 text-sm text-zinc-500">Todavía no hay movimientos.</p>
         )}
         <ul className="mt-2 divide-y divide-zinc-100">
-          {recientes.map((m) => (
+          {recientesServidor.map((m) => (
             <li key={m.id} className="flex items-center gap-2 py-2 text-sm">
               <span
                 className={`rounded px-1.5 py-0.5 text-xs font-bold ${

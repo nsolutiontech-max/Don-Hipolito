@@ -1,28 +1,23 @@
 "use client";
 
-import type { Responsable, Turno } from "@/lib/data";
+import type { Turno } from "@/lib/data";
 
 type Props = {
   fecha: string;
   turno: Turno;
-  responsableId: string | null;
-  responsables: Responsable[];
+  responsableNombre: string;
   onTurno: (t: Turno) => void;
-  onResponsable: (id: string) => void;
 };
 
-export function CountHeader({
-  fecha,
-  turno,
-  responsableId,
-  responsables,
-  onTurno,
-  onResponsable,
-}: Props) {
+/** El responsable sale de la sesión: nadie puede cargar a nombre de otro. */
+export function CountHeader({ fecha, turno, responsableNombre, onTurno }: Props) {
   return (
     <div className="rounded-xl border border-zinc-200 bg-white p-4">
       <p className="text-sm text-zinc-500">
         Conteo del <span className="font-semibold text-zinc-900">{fecha}</span>
+      </p>
+      <p className="mt-1 text-sm">
+        Responsable: <span className="font-semibold text-zinc-900">{responsableNombre}</span>
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {(["MEDIODIA", "NOCHE"] as Turno[]).map((t) => (
@@ -40,23 +35,6 @@ export function CountHeader({
           </button>
         ))}
       </div>
-      <label className="mt-3 flex flex-col gap-1">
-        <span className="text-xs font-medium text-zinc-500">Responsable del turno</span>
-        <select
-          value={responsableId ?? ""}
-          onChange={(e) => onResponsable(e.target.value)}
-          className="h-12 rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900"
-        >
-          <option value="" disabled>
-            Elegir responsable…
-          </option>
-          {responsables.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.nombre}
-            </option>
-          ))}
-        </select>
-      </label>
     </div>
   );
 }

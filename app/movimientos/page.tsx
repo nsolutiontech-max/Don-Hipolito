@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { MovementForm } from "@/components/movimientos/MovementForm";
-import { getCatalogo, getMovimientosRecientes } from "@/lib/data";
-import { supabaseConfigurado } from "@/lib/supabase/server";
+import { exigirSesion, getCatalogo, getMovimientosRecientes } from "@/lib/data";
 
 export default async function MovimientosPage() {
+  const sesion = await exigirSesion().catch(() => null);
+  if (!sesion) redirect("/login");
   const [catalogo, recientes] = await Promise.all([
     getCatalogo(),
     getMovimientosRecientes(),
@@ -11,7 +13,7 @@ export default async function MovimientosPage() {
     <MovementForm
       catalogo={catalogo}
       recientesServidor={recientes}
-      usaSupabase={supabaseConfigurado}
+      responsableNombre={sesion.responsable_nombre ?? sesion.email}
     />
   );
 }

@@ -1,11 +1,6 @@
-import { supabaseServer, supabaseConfigurado } from "@/lib/supabase/server";
-import {
-  CATEGORIAS_FALLBACK,
-  PRODUCTOS_FALLBACK,
-  RESPONSABLES_FALLBACK,
-} from "@/lib/seed-data";
+import { supabaseServer } from "@/lib/supabase/server";
 
-// Tipos espejo de las tablas en español (ver supabase/migrations/001_schema.sql)
+// Tipos espejo de las tablas en español (ver supabase/migrations/*.sql)
 export type Categoria = { id: string; nombre: string; orden: number };
 export type Producto = {
   id: string;
@@ -25,6 +20,7 @@ export type DetalleConteo = {
 };
 export type Turno = "MEDIODIA" | "NOCHE";
 export type TipoMovimiento = "INGRESO" | "EGRESO";
+export type Rol = "DUEÑO" | "ENCARGADO";
 export type Movimiento = {
   id: string;
   producto_id: string;
@@ -34,6 +30,13 @@ export type Movimiento = {
   fecha: string;
   responsable_id: string | null;
 };
+export type SesionUsuario = {
+  id: string;
+  email: string;
+  rol: Rol;
+  responsable_id: string | null;
+  responsable_nombre: string | null;
+};
 
 export type Catalogo = {
   categorias: Categoria[];
@@ -41,15 +44,44 @@ export type Catalogo = {
   responsables: Responsable[];
 };
 
+/** Sesión + rol desde el servidor. Null si no hay login o el usuario está inactivo. */
+export async function getSesionUsuario(): Promise<SesionUsuario | null> {
+  const db = await supabaseServer();
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+  if (!user?.email) return null;
+  const { data, error } = await db
+    .from("usuarios")
+    .select("id, email, rol, responsable_id, responsables(nombre)")
+    .eq("id", user.id)
+    .eq("activo", true)
+    .maybeSingle();
+  if (error || !data) return null;
+  const resp = data.responsables as unknown as { nombre: string } | null;
+  return {
+    id: data.id as string,
+    email: data.email as string,
+    rol: data.rol as Rol,
+    responsable_id: (data.responsable_id as string | null) ?? null,
+    responsable_nombre: resp?.nombre ?? null,
+  };
+}
+
+export async function exigirSesion(): Promise<SesionUsuario> {
+  const s = await getSesionUsuario();
+  if (!s) throw new Error("Sesión requerida.");
+  return s;
+}
+
+export async function exigirDueno(): Promise<SesionUsuario> {
+  const s = await exigirSesion();
+  if (s.rol !== "DUEÑO") throw new Error("Solo el dueño puede hacer esto.");
+  return s;
+}
+
 export async function getCatalogo(): Promise<Catalogo> {
-  if (!supabaseConfigurado) {
-    return {
-      categorias: CATEGORIAS_FALLBACK,
-      productos: PRODUCTOS_FALLBACK,
-      responsables: RESPONSABLES_FALLBACK,
-    };
-  }
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const [cats, prods, resps] = await Promise.all([
     db.from("categorias").select("id,nombre,orden").order("orden"),
     db.from("productos").select("id,categoria_id,nombre,unidad_medida,stock_minimo,stock_ideal").eq("activo", true),
@@ -69,8 +101,7 @@ export async function getDetalles(
   fecha: string,
   turno: Turno,
 ): Promise<DetalleConteo[]> {
-  if (!supabaseConfigurado) return [];
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const { data: inv } = await db
     .from("inventarios")
     .select("id")
@@ -92,7 +123,7 @@ export async function getOrCreateInventario(
   turno: Turno,
   responsable_id: string | null,
 ): Promise<string> {
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const { data: existente } = await db
     .from("inventarios")
     .select("id")
@@ -118,7 +149,7 @@ export async function guardarDetalles(
   inventario_id: string,
   detalles: DetalleConteo[],
 ): Promise<void> {
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const filas = detalles
     .filter((d) => d.stock_real !== null)
     .map((d) => ({
@@ -144,8 +175,7 @@ export function fechaHoy(): string {
 }
 
 export async function getMovimientosRecientes(limite = 20): Promise<Movimiento[]> {
-  if (!supabaseConfigurado) return [];
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const { data, error } = await db
     .from("movimientos")
     .select("id,producto_id,tipo,cantidad,motivo,fecha,responsable_id")
@@ -162,7 +192,7 @@ export async function guardarMovimiento(input: {
   motivo: string;
   responsable_id: string | null;
 }): Promise<void> {
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const { error } = await db.from("movimientos").insert(input);
   if (error) throw new Error("No se pudo guardar el movimiento.");
 }
@@ -171,7 +201,7 @@ export async function crearPedido(
   fecha: string,
   items: { producto_id: string; cantidad: number }[],
 ): Promise<string> {
-  const db = supabaseServer();
+  const db = await supabaseServer();
   const { data: pedido, error } = await db
     .from("pedidos")
     .insert({ fecha, estado: "PENDIENTE" })
