@@ -8,7 +8,7 @@ Inventarios, bebidas, tareas y pedidos del restaurante. Cada planilla correspond
 2. Configurar `.env.local` con las variables de `.env.example`.
 3. Ejecutar `npm run dev` y abrir `http://localhost:3000`.
 
-La base remota ya tiene las migraciones 001–006. No ejecutar los seeds legados sobre esa base. Para el estado de instalación y nuevas migraciones, consultar [ARQUITECTURA.md](ARQUITECTURA.md).
+La base remota ya tiene las migraciones 001–007. No ejecutar los seeds legados sobre esa base. Para el estado de instalación y nuevas migraciones, consultar [ARQUITECTURA.md](ARQUITECTURA.md).
 
 ## Uso diario
 
@@ -18,6 +18,7 @@ La base remota ya tiene las migraciones 001–006. No ejecutar los seeds legados
 - **Tareas:** elegir Cocina o Salón; registrar hora y observaciones. Actualizar una ocurrencia modifica el mismo registro diario.
 - **Pedidos:** generar desde un inventario guardado y compartir por WhatsApp. Abrir WhatsApp no prueba que el mensaje haya sido enviado.
 - **Auditorías (dueño):** elegir fecha, responder los 84 criterios en bloques de Cocina y Salón/General, guardar el borrador y cerrar con firma. Después del cierre no se puede editar.
+- **Entrevistas (dueño):** crear una evaluación por candidato, responder Sí/No por criterio, registrar resultados por sección y decisión final.
 - **Más:** perfil y cierre de sesión. Salir elimina los borradores locales de ese dispositivo.
 
 CAMARERO sólo accede a Bebidas, Tareas Salón Check y la referencia Tareas Salón. El usuario creado es `camarero@donhipolito.com`; la contraseña temporal está en la variable local ignorada `CAMARERO_TEMP_PASSWORD`. No compartir el archivo `.env.local`.
@@ -45,4 +46,4 @@ playwright-cli -s=hipolito open --browser=msedge
 node scripts/browser-smoke.mjs
 ```
 
-En otro sistema, configurar `PLAYWRIGHT_CLI_JS` con la ruta del ejecutable JavaScript del CLI. El script usa cuentas temporales y elimina sus registros al terminar. Entrevistas y el ABM completo del dueño todavía están pendientes.
+En otro sistema, configurar `PLAYWRIGHT_CLI_JS` con la ruta del ejecutable JavaScript del CLI. El script usa cuentas temporales y elimina sus registros al terminar. El ABM completo del dueño todavía está pendiente.

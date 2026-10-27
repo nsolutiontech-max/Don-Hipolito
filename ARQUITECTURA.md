@@ -15,7 +15,7 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Pedidos | Persistidos, asociados al inventario, creación transaccional e idempotente; exportación por WhatsApp |
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
 | Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
-| Entrevista Práctica | Pendiente: evaluación privada por candidato |
+| Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
 | Administración | Hub del dueño con Auditorías y estado del plan; ABM completo de catálogo, frecuencias y usuarios pendiente |
 | Cierre de planillas / reapertura | Pendiente; el bloque actual permite guardar y retomar, sin cierre automático |
 | Despliegue y aceptación en restaurante | Pendientes; las pruebas automatizadas no sustituyen un día real de operación |
@@ -85,6 +85,16 @@ El borrador se guarda en cualquier momento. La operación normal puede completar
 
 La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nueva versión de plantilla, no editar la actual.
 
+### Entrevistas
+
+- `entrevista_plantillas`: plantilla `ENTREVISTA_PRACTICA`, con 6 secciones y 40 criterios extraídos del XLSX.
+- `entrevista_secciones`: título, instrucción condicional y resultado de sección.
+- `entrevista_criterios`: Sí/No por criterio y observación opcional.
+- `entrevistas`: candidato, fecha, puesto aspirado, evaluador derivado de sesión, cinco valoraciones finales (1–5), decisión final, puesto sugerido y observaciones.
+- Los triggers validan que cada respuesta pertenezca a la plantilla de esa entrevista.
+
+**No hay registro formal de incorporación, capacitación ni estado de contratación todavía.** La evaluación queda como historial privado del dueño.
+
 ### Permisos
 
 | Acceso | DUEÑO | ENCARGADO | CAMARERO |
@@ -96,7 +106,7 @@ La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nu
 | Movimientos / Pedidos / Compras / Proveedores | Sí | Sí | No |
 | Auditoría y plantilla de 84 criterios | Sí | No | No |
 | Catálogo y gestión de usuarios | Sí | No | No |
-| Futuras entrevistas | Sí | No | No |
+| Entrevistas | Sí | No | No |
 
 Las funciones `SECURITY DEFINER` sólo responden predicados de permisos y fijan `search_path = ''`. Las RPC de escritura son `SECURITY INVOKER`, con ejecución revocada a `PUBLIC` y `anon`. Una cuenta inactiva no accede al catálogo. Los triggers derivan autor y responsable desde la sesión, incluso si se escribe directamente por REST.
 
@@ -113,6 +123,7 @@ app/tareas/[area]/[fecha]      carga diaria y actualización de ocurrencias
 app/pedidos                   historial persistido y exportación WhatsApp
 app/movimientos               ingresos y egresos
 app/auditorias                auditoría diaria del dueño e historial
+app/entrevistas               evaluaciones prácticas privadas del dueño
 app/admin                     hub del dueño y estado de pendientes
 app/mas                       perfil, accesos según rol y cierre de sesión
 lib/data.ts                   capa de lectura/autenticación sólo servidor
@@ -120,8 +131,10 @@ lib/types.ts                  contratos compartidos
 lib/permissions.ts            permisos y conversión de rutas
 lib/tasks.ts                  consultas de tareas
 lib/audits.ts                 plantilla, respuestas e historial de auditoría
+lib/interviews.ts              plantilla, criterios e historial de entrevistas
 scripts/generar-seed3.py       extracción reproducible del XLSX
 scripts/generar-seed-auditoria.py extracción reproducible de los 84 criterios
+scripts/generar-seed-entrevista.py extracción reproducible de la evaluación práctica
 scripts/test-db.mjs            pruebas PostgreSQL/RLS con rollback total
 scripts/browser-smoke.mjs      escenarios de navegador y limpieza de fixtures
 ```
@@ -138,6 +151,7 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 2. `004_tareas_diarias.sql` + `seed4_tareas.sql`: ocurrencias y referencia de Salón.
 3. `005_autoria_operativa.sql`: responsable de sesión para escrituras operativas directas y helper de dueño endurecido.
 4. `006_auditorias.sql` + `seed5_auditoria.sql`: plantilla, borrador/cierre y permisos de auditoría.
+5. `007_entrevistas.sql` + `seed6_entrevistas.sql`: plantilla de evaluación práctica y acceso privado del dueño.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
 
@@ -157,11 +171,11 @@ TLS se verifica por defecto. En esta red se necesitó la excepción explícita `
 - `npm run lint`: sin errores.
 - `npm test`: 6 pruebas de dominio.
 - `npm run test:catalog`: 3 pruebas contra las celdas del XLSX.
-- `npm run test:db`: 42 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
-- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador, cierre 83 OK / 1 NO OK, permisos por URL y logout; vistas de 390 y 1280 px.
+- `npm run test:db`: 49 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
+- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, permisos por URL y logout; vistas de 390 y 1280 px.
 
 Los escenarios de navegador crean registros en una fecha futura sin datos previos y un ENCARGADO temporal; los eliminan al terminar. No representan el primer día de uso real. La edición concurrente de la misma fila sigue siendo última escritura válida; no hay colaboración en tiempo real ni resolución automática de conflictos.
 
 ## Siguiente bloque
 
-Implementar Entrevista Práctica con tablas y permisos propios, completar Administración y el ciclo de estados de pedidos, definir cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Antes de activar pedidos automáticos, confirmar unidades y objetivos reales con el dueño.
+Completar Administración y el ciclo de estados de pedidos, definir cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Antes de activar pedidos automáticos, confirmar unidades y objetivos reales con el dueño.

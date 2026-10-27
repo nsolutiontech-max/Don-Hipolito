@@ -46,6 +46,7 @@ next-env.d.ts
 # Local tooling state
 .atl/
 .engram/
+/.playwright-cli/
 
 # Office temporary lock files
 ~$*

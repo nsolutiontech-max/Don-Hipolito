@@ -36,7 +36,7 @@ T3 [T1,T2] Aplicado: 003 + seed3 + 004 + seed4 + 005 + 006 + seed5 en la DB real
 
 T4 [S2,S3] Implementado: sin turnos; borradores aislados por usuario/planilla/fecha, recuperación explícita y limpieza al salir. Navegador confirma guardar/recargar y recuperar.
 
-T5 [S4] Implementado: `canAccessSheet`, guards, navegación filtrada por RLS, RPC SECURITY INVOKER y autoría por triggers. Cuenta CAMARERO creada; credenciales sólo en `.env.local`. 42 comprobaciones SQL/RLS.
+T5 [S4] Implementado: `canAccessSheet`, guards, navegación filtrada por RLS, RPC SECURITY INVOKER y autoría por triggers. Cuenta CAMARERO creada; credenciales sólo en `.env.local`. 49 comprobaciones SQL/RLS.
 
 T6 [S9] Implementado: tokens, shell móvil/escritorio, Hoy/Stock/Tareas/Más y progreso de inventarios y auditoría en `/hoy`. Progreso agregado de tareas en Hoy aún pendiente.
 
@@ -50,9 +50,9 @@ T10 [S1] Parcial: 49/36 ocurrencias Check, referencia de 20 frecuencias, hora y 
 
 T11 [S1] Implementado: plantilla inmutable con 84 criterios (40 Cocina + 44 Salón/General), borrador parcial, OK/NO OK, observaciones/mejora/necesidad, cierre validado con firma e historial. SQL/RLS y navegador del dueño verificados. Reabrir auditoría cerrada y firmas gráficas quedan pendientes.
 
-T12 [S8] Pendiente: Entrevistas (evaluación por candidato).
+T12 [S8] Implementado: plantilla con 6 secciones y 40 criterios, evaluación por candidato, resultados por sección, observaciones, 5 valoraciones finales y decisión. Acceso exclusivo DUEÑO en RLS/acciones/rutas; SQL, build y navegador verificados. Historial de contratación/finalización formal queda pendiente.
 
-T13 [S1] Parcial: hub del dueño con acceso a Auditorías y estado de pendientes. Falta ABM de catálogo/plantillas/usuarios.
+T13 [S1] Parcial: hub del dueño con acceso a Auditorías y Entrevistas y estado de pendientes. Falta ABM de catálogo/plantillas/usuarios.
 
 T14 [S10] Actualizados: `ARQUITECTURA.md` y README con estado real, permisos, comandos, pruebas, límites y pendientes.
 
@@ -66,8 +66,10 @@ L3. 2026-10-27: ejecución iniciada. Branch feat/planillas-digitalizables.
 
 L4. 2026-10-27: migraciones 003/004/005 aplicadas y CAMARERO creado. 6 pruebas de dominio, 3 de catálogo y comprobaciones PostgreSQL/RLS en verde. Smoke de Edge para CAMARERO y ENCARGADO con fixtures futuros eliminados al terminar. Build y lint correctos. No se modificó la eliminación preexistente de CLAUDE.md.
 
-L5. 2026-10-27: plan de analítica movido a Docs y registrado como T15–T20. Implementada Auditoría (006/seed5), aplicada en DB y verificada con 42 comprobaciones SQL/RLS y smoke Edge de CAMARERO, ENCARGADO y DUEÑO. La prueba de dueño cierra una auditoría 83 OK / 1 NO OK con firma; fixtures se eliminan.
+L5. 2026-10-27: plan de analítica movido a Docs y registrado como T15–T20. Implementada Auditoría (006/seed5), aplicada en DB y verificada con comprobaciones SQL/RLS y smoke Edge de CAMARERO, ENCARGADO y DUEÑO. La prueba de dueño cierra una auditoría 83 OK / 1 NO OK con firma; fixtures se eliminan.
+
+L6. 2026-10-27: implementada Entrevista Práctica (007/seed6), aplicada en DB. 49 comprobaciones PostgreSQL/RLS en verde; smoke Edge del dueño crea, guarda y recarga una evaluación con respuesta y valoración final. Fixtures se eliminan.
 
 ## Límite de esta entrega
 
-No se declara completado el plan entero. Faltan Entrevistas, ABM del dueño, programación automática de frecuencias, cierre/reapertura, ciclo completo de pedidos, exportación PDF, analítica T15–T20 y aceptación en cocina. Sin cambios remotos de deployment y sin commit/push.
+No se declara completado el plan entero. Faltan ABM del dueño, programación automática de frecuencias, cierre/reapertura, ciclo completo de pedidos, exportación PDF, analítica T15–T20 y aceptación en cocina. Sin cambios remotos de deployment y sin commit/push.
