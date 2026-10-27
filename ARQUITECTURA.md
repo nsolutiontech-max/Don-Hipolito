@@ -1,14 +1,15 @@
 # Don Hipólito · Control de Stock — Arquitectura MVP y Plan de Fases
 
-> Reemplazo digital de la planilla en papel (fotos `imagenes/1.jpeg`, `imagenes/2.jpeg`): conteo diario por categoría, stock actual y cantidad a pedir, con responsable y fecha por turno.
+> Reemplazo digital de la planilla en papel (digitalizada en `Docs/Planillas Digitalizables.pdf/.xlsx`): conteo diario por categoría, stock actual y cantidad a pedir, con responsable y fecha por turno.
 
-## Quick path — cómo vamos a construirlo
+## Quick path — estado de construcción
 
-1. **Fase 0:** scaffold Next.js + Tailwind + Supabase + PWA instalable (esta semana).
-2. **Fase 1:** migración SQL + seed con las 6 categorías y ~55 productos reales de tu papel.
-3. **Fase 2:** módulo Conteo Diario mobile-first (el corazón del MVP).
-4. **Fase 3:** Movimientos (ingreso/merma). **Fase 4:** Pedidos + WhatsApp. **Fase 5:** polish + deploy.
-5. Verificación de cada fase = checklist de aceptación al final de este archivo.
+1. **Fase 0 ✅:** scaffold Next.js + Tailwind + Supabase + PWA instalable.
+2. **Fase 1 ✅:** migraciones SQL (`001` schema, `002` seguridad/usuarios) + seeds (`seed.sql`, `seed2.sql`) con 10 categorías y ~85 productos.
+3. **Fase 2 ✅:** módulo Conteo Diario mobile-first (el corazón del MVP).
+4. **Fase 3 ✅:** Movimientos (ingreso/merma). **Fase 4 ✅:** Pedidos + WhatsApp.
+5. **Extra implementado (fuera del plan original):** Auth con roles DUEÑO/ENCARGADO, panel `/admin`, tabla `usuarios` vinculada a `auth.users`, proveedores, compras y actividades con registros.
+6. **Fase 5 (pendiente):** polish + deploy final. Verificación de cada fase = checklist de aceptación al final de este archivo.
 
 ## Decisiones cerradas
 
@@ -16,13 +17,14 @@
 |------|----------|
 | Stack | Next.js App Router + Tailwind CSS + Supabase (Postgres) + PWA |
 | PWA | Instalable (manifest + iconos). **Sin offline**: hay wifi estable, se evita Service Worker y conflictos de sync |
-| Responsables | Lista simple (`responsables` tabla), sin Supabase Auth en MVP. Migrable a Auth luego |
+| Responsables | Lista simple (`responsables` tabla). **Auth implementado** (migración 002): `usuarios` vincula `auth.users` con rol `DUEÑO`/`ENCARGADO` y `responsable_id` opcional |
+| Acceso | Login por email/contraseña (Supabase Auth). Dueño (`guille@`) gestiona catálogo y usuarios; encargados operan conteo/movimientos/pedidos. Contraseñas gestionadas por `auth.users` (solo reset, no recuperación) |
 | Modelo de datos | Relacional normalizado (no JSON embebido). Detalles de inventario en tabla propia |
 | Cálculo pedido | `pedido_sugerido = MAX(0, stock_ideal - stock_real)`, editable manual con marca AUTO/MANUAL |
 | Unidades | `KG, UN, LT, PAQ, ATADO, CAJA`. Inputs aceptan decimales y fracciones (`1/2`, `1/4`, `2.5`) |
 | Idioma artefactos | Docs en español neutro; identificadores de código y SQL en inglés |
 
-Fuera de alcance MVP: multi-sucursal, proveedores múltiples, costos/precios, roles y permisos, modo offline.
+Fuera de alcance MVP: multi-sucursal, modo offline. Costos/precios y proveedores entraron por migración 002 (compras + proveedores); roles/permisos también implementados.
 
 ## Arquitectura deseable
 
@@ -83,7 +85,7 @@ hipolito-stock/
 
 ## Modelo de datos (Supabase / Postgres)
 
-> Nota: sin Auth en MVP, RLS queda permisivo para `anon` con política de lectura/escritura abierta. Endurecer al agregar Auth (Fase futura).
+> Nota: migración 002 reemplazó el acceso anónimo del MVP por RLS por rol: catálogo (lectura autenticada, escritura solo DUEÑO vía función `es_dueno()`), operativa diaria abierta a autenticados, y `usuarios` visible solo para uno mismo o el dueño.
 
 ```sql
 -- 001_schema.sql (tablas y columnas en español)
@@ -160,11 +162,15 @@ create index idx_productos_categoria on productos(categoria_id);
 create index idx_detalles_inventario on inventario_detalles(inventario_id);
 create index idx_movimientos_producto on movimientos(producto_id);
 ```
-Ver SQL ejecutable con RLS en `supabase/migrations/001_schema.sql` y datos en `supabase/seed.sql`.
+Ver SQL ejecutable con RLS en `supabase/migrations/001_schema.sql` y `002_seguridad_y_nuevas_tablas.sql`; datos en `supabase/seed.sql` y `supabase/seed2.sql`.
+
+### Tablas agregadas por 002
+
+`proveedores`, `compras` (precio unitario + proveedor + movimiento vinculado), `actividades`, `actividad_registros` (planilla D: masas, rellenos, salsas, controles, producción, limpieza, plegado) y `usuarios` (rol DUEÑO/ENCARGADO + `responsable_id`).
 
 ### Seed (extraído de tus planillas)
 
-6 categorías con orden: Verdulería, Aceites, Frutos Secos, Especias, Masa, Harinas.
+10 categorías con orden: Verdulería, Aceites, Frutos Secos, Especias, Masa, Harinas (`seed.sql`) + Quesos, Fiambres, Congelados, Varios y 27 actividades (`seed2.sql`). ~85 productos activos.
 
 | Categoría | Productos (ejemplo, lista completa en `seed.sql`) |
 |-----------|--------------------------------------------------|
@@ -179,11 +185,12 @@ Cada producto del seed lleva `unidad_medida`, `stock_minimo` y `stock_ideal` ini
 
 ## UI — Conteo Diario (módulo principal)
 
-Flujo: abrir `/conteo/hoy` → elegir turno + responsable → contar por categoría → guardar → generar pedido.
+Flujo: login → `/conteo/hoy` → contar por categoría → guardar → generar pedido. El responsable sale de la sesión (nunca del cliente); sin `responsable_id` asignado se muestra aviso para que el dueño lo configure.
 
 | Componente | Responsabilidad | Detalle clave |
 |------------|-----------------|---------------|
-| `CountHeader` | fecha, turno MEDIODIA/NOCHE, select responsable | Crea `inventories(date, shift)` si no existe |
+| `LoginForm` / `LogoutButton` | email + contraseña contra Supabase Auth | Redirige a `/conteo/hoy`; layout sin sesión oculta nav |
+| `CountHeader` | fecha, turno MEDIODIA/NOCHE, responsable de sesión | Crea `inventarios(fecha, turno)` si no existe |
 | `CategoryAccordion` | una categoría abierta, resto colapsadas, badge `12/25` | Progreso = detalles con `actual_stock NOT NULL` |
 | `ProductRow` | nombre + unidad + 2 inputs | Fila alta (min 56px), apta dedo en cocina |
 | `StockInput` | stock real | `inputMode="decimal"`, acepta `1/2`, `2,5`; guarda al blur |
@@ -194,35 +201,42 @@ Reglas: guardado parcial por fila (upsert), borrador en `localStorage` como resp
 
 ## UI — fases siguientes (resumen)
 
-* **Movimientos:** `MovementForm` (producto con buscador + tipo INGRESO/EGRESO + cantidad + motivo + responsable). Lista reciente de últimos 20.
-* **Pedidos:** `OrderList` consolidada por categoría desde el conteo del día (`ordered_qty > 0`); `WhatsAppExportButton` genera texto `*PEDIDO DD/MM TURNO* — Verdulería: …` y abre `https://wa.me/?text=<encoded>`. Cambio de estado PENDIENTE→ENVIADO→RECIBIDO.
+* **Movimientos:** `MovementForm` (producto + tipo INGRESO/EGRESO + cantidad + motivo). Lista reciente; responsable siempre de sesión.
+* **Pedidos:** `OrderList` consolidada por categoría; `WhatsAppExportButton` genera texto `*PEDIDO DD/MM TURNO* — Verdulería: …` y abre `https://wa.me/?text=<encoded>`. Cambio de estado PENDIENTE→ENVIADO→RECIBIDO.
+* **Admin (solo DUEÑO):** `/admin` para ABM de productos, proveedores, precios, usuarios y reportes. Link visible en nav con badge ámbar.
 
 ## Fases de construcción
 
-### Fase 0 — Setup base
+> Estado: Fases 0–4 construidas y verificables en código + DB. Fase 5 pendiente. Auth/Admin agregados como extra (migración 002).
+
+### Fase 0 — Setup base ✅
 Objetivo: repo limpio que corre y es instalable como PWA.
 Entregables: Next.js (TS) + Tailwind + ESLint, clientes Supabase, `manifest.webmanifest` + iconos, layout con nav (Conteo/Movimientos/Pedidos), `.env.example`.
 Aceptación: `npm run dev` y `npm run build` en verde; Lighthouse PWA instalable OK.
 
-### Fase 1 — Base de datos + seed
+### Fase 1 — Base de datos + seed ✅
 Objetivo: schema y datos reales.
-Entregables: `001_schema.sql` aplicado, `seed.sql` con 6 categorías + ~55 productos + 3 responsables ejemplo, script de reseed.
-Aceptación: conteo `select count(*) from products` ≥ 50; constraint de fracciones y unique(fecha, turno) verificados.
+Entregables: `001_schema.sql` + `002_seguridad_y_nuevas_tablas.sql` aplicados; `seed.sql` y `seed2.sql` con 10 categorías, ~87 productos, 27 actividades y 3 responsables.
+Aceptación verificada en DB remota (pooler): 87 productos activos, 10 categorías, 4 usuarios, 27 actividades.
 
-### Fase 2 — Conteo Diario ⭐ (corazón del MVP)
+### Fase 2 — Conteo Diario ⭐ (corazón del MVP) — código listo, sin uso real aún
 Objetivo: reemplazar el papel con el celular.
-Entregables: los 6 componentes de la tabla anterior + `lib/calculations.ts` + `lib/quantity-parse.ts` + upsert por fila + draft localStorage.
-Aceptación: completar un conteo de 25 items de Verdulería en < 10 min con una mano; sugerido = ideal − real; edición manual persiste override.
+Entregables: los componentes de conteo + `lib/calculations.ts` + `lib/quantity-parse.ts` + upsert por fila + draft localStorage.
+Aceptación pendiente: completar un conteo de 25 items de Verdulería en < 10 min con una mano (aún no hay `inventarios` registrados).
 
-### Fase 3 — Movimientos
+### Fase 3 — Movimientos — código listo, sin uso real aún
 Objetivo: registrar ingreso de proveedor y merma sin papel aparte.
 Entregables: `MovementForm` + lista reciente + validación qty > 0.
-Aceptación: un INGRESO y un EGRESO quedan listados con fecha y responsable.
+Aceptación pendiente: un INGRESO y un EGRESO registrados (0 movimientos en DB).
 
-### Fase 4 — Pedidos + WhatsApp
+### Fase 4 — Pedidos + WhatsApp — código listo, sin uso real aún
 Objetivo: del conteo al mensaje al proveedor en un tap.
-Entregables: consolidado por categoría, crear `orders` + `order_items`, export `wa.me`, cambio de estado.
-Aceptación: mensaje generado contiene todos los `ordered_qty > 0` agrupados por categoría.
+Entregables: consolidado por categoría, `pedidos` + `pedido_items`, export `wa.me`, cambio de estado.
+Aceptación pendiente: primer pedido real enviado (0 pedidos en DB).
+
+### Extra — Auth + Admin (migración 002, fuera del plan original)
+Entregables: login (`/login`), `usuarios` con rol DUEÑO/ENCARGADO vinculado a `auth.users`, RLS por rol, panel `/admin` para el dueño, `proveedores`, `compras`, `actividades` + `actividad_registros`.
+Usuarios reales: `guille@` (DUEÑO) + `nico@`, `namir@`, `leo@` (ENCARGADO, vinculados a responsables).
 
 ### Fase 5 — Polish + deploy
 Objetivo: usable en cocina real.
@@ -233,20 +247,26 @@ Aceptación: instalado en un Android desde Chrome, abre a pantalla completa, car
 
 | Riesgo | Mitigación |
 |--------|------------|
-| Nombres de productos ilegibles en foto | Seed con `is_active` y pantalla de corrección en Fase 2 |
+| Nombres de productos ilegibles en foto | Seed con `activo` y ABM de corrección en `/admin` |
 | Teclado móvil lento | Inputs `inputMode` + steppers + guardado al blur |
-| Sin Auth, cualquiera edita | Aceptado en MVP; RLS permisivo documentado; Auth en roadmap |
-| Alcance (scope creep con precios/proveedores) | Congelado: no se agregan campos fuera del schema de este archivo |
+| Cuenta compartida/dispositivo en cocina | Cerrar sesión al terminar turno; contraseñas solo reset (nunca recuperación) |
+| Alcance (scope creep) | Congelado: no se agregan campos fuera del schema de este archivo |
 
 ## Checklist global
 
-- [ ] Fase 0: build verde + PWA instalable
-- [ ] Fase 1: ≥ 50 productos seed verificados en Supabase
-- [ ] Fase 2: conteo completo de un turno real sólo con el celular
-- [ ] Fase 3: ingreso y merma registrados
-- [ ] Fase 4: mensaje WhatsApp enviado al proveedor real
+- [ ] Fase 0: build verde + PWA instalable (verificar con `npm run build` + Lighthouse)
+- [x] Fase 1: ≥ 50 productos seed verificados en Supabase (87 activos, verificado por pooler 2026-10-26)
+- [ ] Fase 2: conteo completo de un turno real sólo con el celular (0 inventarios aún)
+- [ ] Fase 3: ingreso y merma registrados (0 movimientos aún)
+- [ ] Fase 4: mensaje WhatsApp enviado al proveedor real (0 pedidos aún)
 - [ ] Fase 5: app instalada en el celular de cocina
 
-## Next step
+## Próximo paso — Plan de diseño (UI/UX)
 
-Responder **"arrancá Fase 0"** y construyo el scaffold Next.js + Supabase + PWA en este repo.
+Definir en una sesión dedicada: sistema de diseño (tokens, tipografía, densidad para cocina), flujo de conteo con una mano, estados vacíos/carga/error consistentes, y accesibilidad táctil. Base actual: Tailwind 4, paleta emerald/zinc, inputs h-12 mobile-first.
+
+## Cómo operar la DB (referencia de sesión)
+
+- **SQL directo:** pooler `postgresql://postgres.<ref>:<pass>@aws-0-us-east-1.pooler.supabase.com:6543/postgres` con `NODE_TLS_REJECT_UNAUTHORIZED=0` (ver `scripts/verificar-db.mjs`).
+- **Admin REST:** `SERVICE_ROLE_KEY` como `Authorization: Bearer` contra `https://<ref>.supabase.co/rest/v1/` y `/admin/v1` para auth admin.
+- **URL directa `db.<ref>.supabase.co`:** bloqueada por DNS en la red actual. CLI completo requiere `SUPABASE_ACCESS_TOKEN` del dashboard.
