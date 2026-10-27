@@ -7,9 +7,9 @@ export function redondear2(n: number): number {
  * Sin conteo (null) devuelve 0: la UI muestra "—" hasta que se cuenta.
  */
 export function cantidadSugerida(
-  stockIdeal: number,
+  stockIdeal: number | null,
   stockReal: number | null,
 ): number {
-  if (stockReal === null || Number.isNaN(stockReal)) return 0;
+  if (stockIdeal === null || stockReal === null || !Number.isFinite(stockReal) || !Number.isFinite(stockIdeal)) return 0;
   return redondear2(Math.max(0, stockIdeal - stockReal));
 }

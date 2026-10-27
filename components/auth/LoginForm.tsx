@@ -28,14 +28,14 @@ export function LoginForm() {
       setEntrando(false);
       return;
     }
-    router.replace("/conteo/hoy");
+    router.replace("/hoy");
     router.refresh();
   };
 
   return (
     <div className="mx-auto mt-10 w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6">
-      <h1 className="text-xl font-bold">Don Hipólito · Stock</h1>
-      <p className="mt-1 text-sm text-zinc-500">Acceso del equipo (cocina y dueño).</p>
+      <h1 className="text-xl font-bold">Don Hipólito · Operaciones</h1>
+      <p className="mt-1 text-sm text-zinc-500">Acceso del equipo de cocina, salón y administración.</p>
       <label className="mt-4 flex flex-col gap-1">
         <span className="text-xs font-medium text-zinc-500">Email</span>
         <input

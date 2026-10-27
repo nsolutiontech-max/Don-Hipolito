@@ -4,6 +4,6 @@ import { getSesionUsuario } from "@/lib/data";
 
 export default async function LoginPage() {
   const sesion = await getSesionUsuario();
-  if (sesion) redirect("/conteo/hoy");
+  if (sesion) redirect("/hoy");
   return <LoginForm />;
 }

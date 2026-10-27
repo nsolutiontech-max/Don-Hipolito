@@ -10,16 +10,19 @@ export function parsearCantidad(input: string): number | null {
   if (mixto) {
     const den = parseFloat(mixto[3]);
     if (!den) return null;
-    return parseFloat(mixto[1]) + parseFloat(mixto[2]) / den;
+    const value = parseFloat(mixto[1]) + parseFloat(mixto[2]) / den;
+    return Number.isFinite(value) ? value : null;
   }
 
   const fraccion = raw.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
   if (fraccion) {
     const den = parseFloat(fraccion[2]);
     if (!den) return null;
-    return parseFloat(fraccion[1]) / den;
+    const value = parseFloat(fraccion[1]) / den;
+    return Number.isFinite(value) ? value : null;
   }
 
+  if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) return null;
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0) return null;
   return n;

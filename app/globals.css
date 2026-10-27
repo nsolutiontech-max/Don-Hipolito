@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand: #047857;
+  --font-sans: Arial, Helvetica, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root { color-scheme: light; }
+body { background: #f4f4f5; color: #18181b; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled), a { cursor: pointer; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+:focus-visible { outline: 3px solid #047857; outline-offset: 3px; }
+h1 { @apply text-2xl font-bold tracking-tight text-zinc-950; }
+h2 { @apply text-lg font-semibold; }
+
+@layer components {
+  .panel { @apply rounded-xl border border-zinc-200 bg-white p-4 sm:p-5; }
+  .eyebrow { @apply mb-1 text-xs font-semibold uppercase tracking-wide text-emerald-800; }
+  .field { @apply min-h-12 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-950 placeholder:text-zinc-500; }
+  .button-primary { @apply inline-flex min-h-12 items-center justify-center rounded-lg bg-emerald-800 px-4 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-900; }
+  .button-secondary { @apply inline-flex min-h-12 items-center justify-center rounded-lg border border-emerald-800 bg-white px-4 py-2 text-center text-sm font-semibold text-emerald-900 hover:bg-emerald-50; }
+  .action-bar { @apply fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 border-t border-zinc-200 bg-white p-3 shadow-lg md:left-60 md:bottom-0 md:px-6; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+main { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }

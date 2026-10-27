@@ -1,16 +1,17 @@
 "use server";
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { exigirOperador } from "@/lib/data";
+import { supabaseServer } from "@/lib/supabase/server";
 
-import { crearPedido } from "@/lib/data";
-
-export async function guardarPedido(
-  fecha: string,
-  items: { producto_id: string; cantidad: number }[],
-): Promise<{ ok: boolean; error?: string }> {
+export async function guardarPedido(inventoryId: string): Promise<{ ok: boolean; id?: string; error?: string }> {
   try {
-    if (items.length === 0) return { ok: false, error: "No hay items para pedir." };
-    await crearPedido(fecha, items);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error desconocido" };
-  }
+    await exigirOperador();
+    if (!z.uuid().safeParse(inventoryId).success) return { ok: false, error: "Inventario no válido." };
+    const db = await supabaseServer();
+    const { data: id, error } = await db.rpc("crear_pedido_con_items", { p_inventario_id: inventoryId });
+    if (error) return { ok: false, error: "El conteo se guardó. Para generar un pedido debe haber artículos contados con cantidades a pedir." };
+    revalidatePath("/pedidos");
+    return { ok: true, id };
+  } catch { return { ok: false, error: "No se pudo generar el pedido. Comprueba tu sesión y vuelve a intentar." }; }
 }

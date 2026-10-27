@@ -9,11 +9,17 @@ export function LogoutButton() {
     <button
       type="button"
       onClick={async () => {
-        await supabaseBrowser().auth.signOut();
+        const { error } = await supabaseBrowser().auth.signOut();
+        if (error) return;
+        try {
+          for (const key of Object.keys(localStorage)) {
+            if (key.startsWith("hipolito")) localStorage.removeItem(key);
+          }
+        } catch { /* Browser storage is optional. */ }
         router.replace("/login");
         router.refresh();
       }}
-      className="rounded px-2 py-1 hover:bg-emerald-700"
+      className="button-secondary"
     >
       Salir
     </button>

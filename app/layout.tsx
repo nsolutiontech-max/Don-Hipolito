@@ -1,69 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import "./globals.css";
+import { AppNavigation } from "@/components/AppNavigation";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { getSesionUsuario } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Don Hipólito · Control de Stock",
-  description: "Conteo diario de insumos del restaurante",
-  manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Don Hipólito Stock", statusBarStyle: "default" },
+  title: "Don Hipólito · Operaciones", description: "Inventarios y tareas diarias del restaurante",
+  manifest: "/manifest.webmanifest", appleWebApp: { capable: true, title: "Don Hipólito", statusBarStyle: "default" },
 };
-
-export const viewport: Viewport = {
-  themeColor: "#047857",
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
-
-const NAV = [
-  { href: "/conteo/hoy", label: "Conteo" },
-  { href: "/movimientos", label: "Movimientos" },
-  { href: "/pedidos", label: "Pedidos" },
-];
+export const viewport: Viewport = { themeColor: "#065f46", width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const sesion = await getSesionUsuario();
-
-  // Sin sesión: solo la pantalla de login, sin shell ni navegación.
-  if (!sesion) {
-    return (
-      <html lang="es" className="h-full">
-        <body className="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
-          <main className="mx-auto w-full max-w-2xl px-4 py-4">{children}</main>
-        </body>
-      </html>
-    );
-  }
-
-  return (
-    <html lang="es" className="h-full">
-      <body className="min-h-full bg-zinc-100 font-sans text-zinc-900 antialiased">
-        <header className="sticky top-0 z-10 bg-emerald-800 text-white">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-            <span className="text-lg font-bold">Don Hipólito · Stock</span>
-            <nav className="flex items-center gap-1 text-sm font-medium">
-              {NAV.map((n) => (
-                <Link key={n.href} href={n.href} className="rounded px-2 py-1 hover:bg-emerald-700">
-                  {n.label}
-                </Link>
-              ))}
-              {sesion.rol === "DUEÑO" && (
-                <Link href="/admin" className="rounded bg-amber-500 px-2 py-1 text-emerald-950">
-                  Admin
-                </Link>
-              )}
-              <LogoutButton />
-            </nav>
-          </div>
-          <p className="mx-auto max-w-2xl px-4 pb-2 text-xs text-emerald-100">
-            {sesion.responsable_nombre ?? sesion.email} · {sesion.rol === "DUEÑO" ? "Dueño" : "Cocina"}
-          </p>
-        </header>
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-4">{children}</main>
-      </body>
-    </html>
-  );
+  const session = await getSesionUsuario();
+  return <html lang="es" className="h-full"><body className="min-h-full font-sans antialiased">
+    {session ? <>
+      <a className="sr-only focus:not-sr-only focus:fixed focus:z-50 focus:bg-white focus:p-3" href="#main">Ir al contenido</a>
+      <aside className="border-b border-zinc-200 bg-white md:fixed md:inset-y-0 md:left-0 md:w-60 md:border-r">
+        <div className="flex items-center justify-between px-4 py-4 md:block md:p-6">
+          <div className="shrink-0"><p className="whitespace-nowrap text-lg font-bold text-emerald-900">Don Hipólito</p><p className="text-xs text-zinc-600">Operaciones diarias</p></div>
+          <div className="min-w-0 max-w-[55%] pl-3 text-right md:mt-6 md:max-w-none md:pl-0 md:text-left"><p className="truncate text-sm font-medium" title={session.responsable_nombre ?? session.email}>{session.responsable_nombre ?? session.email}</p>
+            <p className="text-xs text-zinc-500">{session.rol === "DUEÑO" ? "Dueño" : session.rol === "CAMARERO" ? "Camarero" : "Encargado"}</p></div>
+        </div>
+        <div className="md:px-3"><AppNavigation /></div>
+        <div className="hidden px-6 py-4 md:block"><LogoutButton /></div>
+      </aside>
+      <main id="main" className="mx-auto max-w-5xl px-4 py-5 md:ml-60 md:px-8 md:py-8">{children}</main>
+    </> : <main id="main" className="mx-auto max-w-lg px-4 py-8">{children}</main>}
+  </body></html>;
 }

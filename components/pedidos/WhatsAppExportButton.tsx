@@ -5,13 +5,11 @@ import { armarMensajePedido, whatsappUrl, type ItemPedido } from "@/lib/whatsapp
 export function WhatsAppExportButton({
   items,
   fecha,
-  turno,
 }: {
   items: ItemPedido[];
   fecha: string;
-  turno: string;
 }) {
-  const mensaje = armarMensajePedido(items, fecha, turno);
+  const mensaje = armarMensajePedido(items, fecha);
   return (
     <div className="flex flex-col gap-2">
       <pre className="whitespace-pre-wrap rounded-lg bg-zinc-100 p-3 text-xs leading-relaxed">
