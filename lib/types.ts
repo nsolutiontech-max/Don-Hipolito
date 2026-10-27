@@ -5,6 +5,7 @@ export type Categoria = { id: string; nombre: string; orden: number };
 export type Producto = {
   id: string; categoria_id: string; nombre: string; presentacion: string;
   unidad_medida: string; stock_minimo: number; stock_ideal: number | null; objetivo_confirmado: boolean;
+  activo: boolean;
 };
 export type Responsable = { id: string; nombre: string };
 export type DetalleConteo = {

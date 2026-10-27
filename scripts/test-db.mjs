@@ -51,6 +51,12 @@ try {
       await db.query(readFileSync(path, 'utf8'));
     }
   }
+  const objetivoTrigger = await db.query("select exists(select 1 from pg_trigger where tgname='confirmar_objetivo_producto') as present");
+  if (!objetivoTrigger.rows[0].present) await db.query(readFileSync('supabase/migrations/008_confirmar_objetivo_producto.sql', 'utf8'));
+  const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
+  await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
+  check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
+    'Editing a product target confirms it automatically');
   const interviewCounts = (await db.query(`select
     (select count(*) from public.entrevista_secciones)::int as sections,
     (select count(*) from public.entrevista_criterios)::int as criteria`)).rows[0];
@@ -125,6 +131,8 @@ try {
   await actingAs(ids.ENCARGADO);
   check((await db.query('select * from public.auditoria_items')).rowCount === 0, 'ENCARGADO cannot read audit criteria');
   check((await db.query('select * from public.entrevista_criterios')).rowCount === 0, 'ENCARGADO cannot read interview criteria');
+  const encargadoCatalogo = await db.query("update public.productos set activo = true where id=$1", [targetProduct]);
+  check(encargadoCatalogo.rowCount === 0, 'ENCARGADO cannot edit the catalogue');
   check((await db.query('select * from public.planillas_inventario')).rowCount === 4, 'ENCARGADO sees four inventories');
   const inventory = (await save(sheet.STOCK_A, [{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 2, cantidad_pedida: 3, es_ajuste_manual: true }])).rows[0].id;
   const order = (await db.query('select public.crear_pedido_con_items($1) as id', [inventory])).rows[0].id;
@@ -133,6 +141,8 @@ try {
   check(Number((await db.query('select cantidad from public.pedido_items where pedido_id=$1', [order])).rows[0].cantidad) === 3, 'Order quantities derive from persisted counts');
   await actingAs(ids.DUEÑO);
   check((await db.query('select * from public.usuarios')).rowCount >= 3, 'DUEÑO retains user management access');
+  const duenoCatalogo = await db.query("update public.productos set activo = activo where id=$1", [targetProduct]);
+  check(duenoCatalogo.rowCount === 1, 'DUEÑO can edit the catalogue');
   const criteria = (await db.query('select id from public.auditoria_items order by orden')).rows.map(row => row.id);
   const auditDate = '2099-02-01';
   const auditPayload = criteria.map(item_id => ({ item_id, resultado: null, observaciones: '', mejora: '', necesidad: '' }));

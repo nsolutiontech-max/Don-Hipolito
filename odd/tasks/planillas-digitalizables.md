@@ -32,11 +32,11 @@ T1 [S1,S6,S7] Implementado: migración 003, planillas/secciones/ítems, presenta
 
 T2 [S1,S7] Implementado: generador determinista, seed3 y `Docs/catalogo-conciliado.json`, con las 222 referencias de celda. Verificado con 3 pruebas de catálogo.
 
-T3 [T1,T2] Aplicado: 003 + seed3 + 004 + seed4 + 005 + 006 + seed5 en la DB real; tracking transaccional con checksums. Conteos 57/60/58/47 y plantilla 84 verificados.
+T3 [T1,T2] Aplicado: 003 + seed3 + 004 + seed4 + 005 + 006 + seed5 + 007 + seed6 + 008 en la DB real; tracking transaccional con checksums. Conteos 57/60/58/47, plantilla 84 y plantilla 40 verificados.
 
 T4 [S2,S3] Implementado: sin turnos; borradores aislados por usuario/planilla/fecha, recuperación explícita y limpieza al salir. Navegador confirma guardar/recargar y recuperar.
 
-T5 [S4] Implementado: `canAccessSheet`, guards, navegación filtrada por RLS, RPC SECURITY INVOKER y autoría por triggers. Cuenta CAMARERO creada; credenciales sólo en `.env.local`. 49 comprobaciones SQL/RLS.
+T5 [S4] Implementado: `canAccessSheet`, guards, navegación filtrada por RLS, RPC SECURITY INVOKER y autoría por triggers. Cuenta CAMARERO creada; credenciales rotadas por el dueño. 52 comprobaciones SQL/RLS.
 
 T6 [S9] Implementado: tokens, shell móvil/escritorio, Hoy/Stock/Tareas/Más y progreso de inventarios y auditoría en `/hoy`. Progreso agregado de tareas en Hoy aún pendiente.
 
@@ -52,7 +52,7 @@ T11 [S1] Implementado: plantilla inmutable con 84 criterios (40 Cocina + 44 Sal�
 
 T12 [S8] Implementado: plantilla con 6 secciones y 40 criterios, evaluación por candidato, resultados por sección, observaciones, 5 valoraciones finales y decisión. Acceso exclusivo DUEÑO en RLS/acciones/rutas; SQL, build y navegador verificados. Historial de contratación/finalización formal queda pendiente.
 
-T13 [S1] Parcial: hub del dueño con acceso a Auditorías y Entrevistas y estado de pendientes. Falta ABM de catálogo/plantillas/usuarios.
+T13 [S1] Parcial: hub del dueño con Auditorías, Entrevistas y ABM de catálogo (unidades, objetivos, estado y trigger de confirmación). Falta ABM de usuarios y planillas.
 
 T14 [S10] Actualizados: `ARQUITECTURA.md` y README con estado real, permisos, comandos, pruebas, límites y pendientes.
 
@@ -68,8 +68,10 @@ L4. 2026-10-27: migraciones 003/004/005 aplicadas y CAMARERO creado. 6 pruebas d
 
 L5. 2026-10-27: plan de analítica movido a Docs y registrado como T15–T20. Implementada Auditoría (006/seed5), aplicada en DB y verificada con comprobaciones SQL/RLS y smoke Edge de CAMARERO, ENCARGADO y DUEÑO. La prueba de dueño cierra una auditoría 83 OK / 1 NO OK con firma; fixtures se eliminan.
 
-L6. 2026-10-27: implementada Entrevista Práctica (007/seed6), aplicada en DB. 49 comprobaciones PostgreSQL/RLS en verde; smoke Edge del dueño crea, guarda y recarga una evaluación con respuesta y valoración final. Fixtures se eliminan.
+L6. 2026-10-27: implementada Entrevista Práctica (007/seed6), aplicada en DB. Comprobaciones PostgreSQL/RLS en verde; smoke Edge del dueño crea, guarda y recarga una evaluación con respuesta y valoración final. Fixtures se eliminan.
+
+L7. 2026-10-27: contraseñas de los cinco usuarios rotadas a valores definidos por el dueño y verificadas con login real (REST admin, ruta plural /admin/users/{id}). Implementado ABM de catálogo (008 + UI /admin/catalogo) con trigger de confirmación de objetivo. 52 comprobaciones SQL/RLS y smoke de tres roles en verde, incluyendo edición de catálogo con producto temporal y limpieza automática. Sin push de credenciales en ningún archivo.
 
 ## Límite de esta entrega
 
-No se declara completado el plan entero. Faltan ABM del dueño, programación automática de frecuencias, cierre/reapertura, ciclo completo de pedidos, exportación PDF, analítica T15–T20 y aceptación en cocina. Sin cambios remotos de deployment y sin commit/push.
+No se declara completado el plan entero. Faltan ABM de usuarios/planillas, ciclo completo de pedidos, cierre/reapertura, exportación PDF, analítica T15–T20 y aceptación en cocina. El deploy a Vercel se gestiona manual (proyecto sin Git integration); los commits/push no generan deploys.

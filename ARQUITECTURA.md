@@ -16,7 +16,7 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
 | Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
 | Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
-| Administración | Hub del dueño con Auditorías y estado del plan; ABM completo de catálogo, frecuencias y usuarios pendiente |
+| Administración | Hub del dueño con Auditorías, Entrevistas y ABM de catálogo; gestión de usuarios/planillas pendiente |
 | Cierre de planillas / reapertura | Pendiente; el bloque actual permite guardar y retomar, sin cierre automático |
 | Despliegue y aceptación en restaurante | Pendientes; las pruebas automatizadas no sustituyen un día real de operación |
 
@@ -33,6 +33,7 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Catálogo | No destructivo: se preservan IDs, se concilian sinónimos explícitos y se retienen extras no vinculados para revisión |
 | Presentaciones | Producto + presentación: una Coca-Cola de 350 cc no se mezcla con una de 1 L |
 | Unidades | Las nuevas unidades desconocidas se marcan `POR_DEFINIR`, no se inventan |
+| Confirmación de objetivo | Al fijar `stock_ideal`, un trigger marca `objetivo_confirmado = true`. Borrar el valor desactiva la sugerencia aunque el flag siga en `true` |
 | Pedido sugerido | Sólo si `objetivo_confirmado = true` y existe `stock_ideal`. Los ideales estimados antiguos se conservan, pero no se usan automáticamente |
 | Respaldo local | Borrador por usuario + planilla + fecha; sólo guarda filas modificadas y observaciones. Recuperación explícita; aviso si cambió la versión del servidor |
 | PWA | Manifest e iconos existentes. Sin modo offline ni sincronización en segundo plano |
@@ -125,6 +126,7 @@ app/movimientos               ingresos y egresos
 app/auditorias                auditoría diaria del dueño e historial
 app/entrevistas               evaluaciones prácticas privadas del dueño
 app/admin                     hub del dueño y estado de pendientes
+app/admin/catalogo            ABM de productos: nombre, categoría, unidad, objetivos
 app/mas                       perfil, accesos según rol y cierre de sesión
 lib/data.ts                   capa de lectura/autenticación sólo servidor
 lib/types.ts                  contratos compartidos
@@ -132,6 +134,8 @@ lib/permissions.ts            permisos y conversión de rutas
 lib/tasks.ts                  consultas de tareas
 lib/audits.ts                 plantilla, respuestas e historial de auditoría
 lib/interviews.ts              plantilla, criterios e historial de entrevistas
+lib/catalog-admin.ts           ABM de catálogo sólo servidor
+lib/constants.ts               unidades compartidas
 scripts/generar-seed3.py       extracción reproducible del XLSX
 scripts/generar-seed-auditoria.py extracción reproducible de los 84 criterios
 scripts/generar-seed-entrevista.py extracción reproducible de la evaluación práctica
@@ -152,6 +156,7 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 3. `005_autoria_operativa.sql`: responsable de sesión para escrituras operativas directas y helper de dueño endurecido.
 4. `006_auditorias.sql` + `seed5_auditoria.sql`: plantilla, borrador/cierre y permisos de auditoría.
 5. `007_entrevistas.sql` + `seed6_entrevistas.sql`: plantilla de evaluación práctica y acceso privado del dueño.
+6. `008_confirmar_objetivo_producto.sql`: trigger que confirma el objetivo al fijar `stock_ideal`.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
 
@@ -171,11 +176,11 @@ TLS se verifica por defecto. En esta red se necesitó la excepción explícita `
 - `npm run lint`: sin errores.
 - `npm test`: 6 pruebas de dominio.
 - `npm run test:catalog`: 3 pruebas contra las celdas del XLSX.
-- `npm run test:db`: 49 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
-- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, permisos por URL y logout; vistas de 390 y 1280 px.
+- `npm run test:db`: 52 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
+- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, permisos por URL y logout; vistas de 390 y 1280 px.
 
 Los escenarios de navegador crean registros en una fecha futura sin datos previos y un ENCARGADO temporal; los eliminan al terminar. No representan el primer día de uso real. La edición concurrente de la misma fila sigue siendo última escritura válida; no hay colaboración en tiempo real ni resolución automática de conflictos.
 
 ## Siguiente bloque
 
-Completar Administración y el ciclo de estados de pedidos, definir cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Antes de activar pedidos automáticos, confirmar unidades y objetivos reales con el dueño.
+Completar el ABM de usuarios/planillas del dueño, el ciclo de estados de pedidos, cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto.

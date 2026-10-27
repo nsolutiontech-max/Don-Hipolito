@@ -6,7 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { environment } from './db.mjs';
 
-async function scenario(page, credentials, role, date, base, screenshots) {
+async function scenario(page, credentials, role, date, base, screenshots, smokeProduct) {
   const ensure = (condition, message) => { if (!condition) throw new Error(message); };
   await page.context().clearCookies();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -105,6 +105,21 @@ async function scenario(page, credentials, role, date, base, screenshots) {
     ensure(await page.getByRole('button', { name: 'Sí', exact: true }).first().getAttribute('aria-pressed') === 'true',
       'Interview response did not survive reload');
     if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-entrevista-mobile.png` });
+    await page.goto(`${base}/admin/catalogo`);
+    await page.getByRole('heading', { name: 'Catálogo de productos' }).waitFor();
+    await page.getByPlaceholder('Buscar por nombre o categoría…').fill(smokeProduct);
+    const row = page.locator('article').first();
+    ensure(await row.getByLabel('Nombre').inputValue() === smokeProduct, 'Catalogue filter did not isolate the fixture product');
+    await row.getByLabel('Unidad').selectOption('UN');
+    await row.getByLabel('Stock ideal (vacío = sin definir)').fill('5');
+    await row.getByRole('button', { name: 'Guardar cambios' }).click();
+    await row.getByText('Producto actualizado.').waitFor();
+    await page.reload();
+    await page.getByPlaceholder('Buscar por nombre o categoría…').fill(smokeProduct);
+    ensure(await row.getByLabel('Unidad').inputValue() === 'UN', 'Catalogue unit did not survive reload');
+    ensure(await row.getByLabel('Stock ideal (vacío = sin definir)').inputValue() === '5', 'Catalogue target did not survive reload');
+    await row.getByText('objetivo confirmado').waitFor();
+    if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-catalogo-mobile.png` });
   }
   ensure(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Horizontal overflow on mobile');
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -122,6 +137,7 @@ const cli = env.PLAYWRIGHT_CLI_JS || join(env.APPDATA, 'npm/node_modules/@playwr
 const temp = mkdtempSync(join(env.LOCALAPPDATA, 'Temp/opencode/hipolito-smoke-'));
 let temporaryUsers = [];
 const date = `2099-11-${String(1 + randomBytes(1)[0] % 28).padStart(2, '0')}`;
+const smokeProduct = `ZZ Smoke ${randomBytes(4).toString('hex')}`;
 const checked = async promise => { const result = await promise; if (result.error) throw result.error; return result.data; };
 let reserved = false;
 try {
@@ -140,9 +156,12 @@ try {
     if (role === 'ENCARGADO') encargado = { email, password };
     if (role === 'DUEÑO') dueno = { email, password };
   }
-  for (const [role, credentials] of [['CAMARERO', { email: env.CAMARERO_EMAIL, password: env.CAMARERO_TEMP_PASSWORD }], ['ENCARGADO', encargado], ['DUEÑO', dueno]]) {
+  const bebidas = await checked(admin.from('categorias').select('id').eq('nombre', 'Bebidas').single());
+  await checked(admin.from('productos').insert({ categoria_id: bebidas.id, nombre: smokeProduct,
+    unidad_medida: 'POR_DEFINIR', stock_minimo: 0, stock_ideal: null, activo: true }));
+  for (const [role, credentials] of [['CAMARERO', { email: env.CAMARERO_EMAIL, password: env.CAMARERO_SMOKE_PASSWORD || env.CAMARERO_TEMP_PASSWORD }], ['ENCARGADO', encargado], ['DUEÑO', dueno]]) {
     const file = join(temp, 'scenario.js');
-    writeFileSync(file, `async page => { const scenario = ${scenario.toString()}; return scenario(page, ${JSON.stringify(credentials)}, ${JSON.stringify(role)}, ${JSON.stringify(date)}, ${JSON.stringify(env.SMOKE_BASE_URL || 'http://localhost:3011')}, ${JSON.stringify(env.SMOKE_SCREENSHOT_DIR || null)}); }`, { mode: 0o600 });
+    writeFileSync(file, `async page => { const scenario = ${scenario.toString()}; return scenario(page, ${JSON.stringify(credentials)}, ${JSON.stringify(role)}, ${JSON.stringify(date)}, ${JSON.stringify(env.SMOKE_BASE_URL || 'http://localhost:3011')}, ${JSON.stringify(env.SMOKE_SCREENSHOT_DIR || null)}, ${JSON.stringify(smokeProduct)}); }`, { mode: 0o600 });
     const output = execFileSync(process.execPath, [cli, '-s=hipolito', '--raw', 'run-code', `--filename=${file}`], { cwd: temp, encoding: 'utf8', timeout: 120000 });
     console.log(output);
     if (!output.includes(`${role}: login, permissions`)) throw new Error('Browser scenario did not complete');
@@ -163,6 +182,7 @@ try {
     await checked(admin.from('auditorias').delete().eq('fecha', date));
     if (temporaryUsers.length) await checked(admin.from('entrevistas').delete().in('evaluador_id', temporaryUsers));
     await checked(admin.from('actividad_registros').delete().eq('fecha', date));
+    await checked(admin.from('productos').delete().eq('nombre', smokeProduct));
   }
   for (const id of temporaryUsers) await checked(admin.auth.admin.deleteUser(id));
   rmSync(temp, { recursive: true, force: true });

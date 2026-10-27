@@ -17,8 +17,10 @@ export default async function AdminPage() {
         <p className="mt-2 text-sm text-zinc-600">Ranking de compras, evolución de precios y recetas. Plan en <code>Docs/hipolito-analitica-compras-costos.md</code>.</p></div>
       <div className="panel" aria-disabled="true"><p className="eyebrow">Planificado</p><h2>Exportar e imprimir</h2>
         <p className="mt-2 text-sm text-zinc-600">Descarga PDF por planilla y fecha después de completar todas las hojas.</p></div>
-      <div className="panel" aria-disabled="true"><p className="eyebrow">Pendiente</p><h2>Catálogo y usuarios</h2>
-        <p className="mt-2 text-sm text-zinc-600">Productos, unidades, objetivos, proveedores y cuentas se administran todavía por base de datos.</p></div>
+      <Link className="panel hover:border-emerald-600" href="/admin/catalogo"><p className="eyebrow">Gestión</p>
+        <h2>Catálogo de productos</h2><p className="mt-2 text-sm text-zinc-600">Unidades, mínimos, objetivos y estado de cada artículo.</p></Link>
+      <div className="panel" aria-disabled="true"><p className="eyebrow">Pendiente</p><h2>Usuarios y planillas</h2>
+        <p className="mt-2 text-sm text-zinc-600">Crear cuentas, asignar roles/responsables y administrar secciones de planilla se administran todavía por base de datos.</p></div>
     </div>
     <p className="panel text-sm text-zinc-700">No mostrar como disponible lo planificado evita que el equipo opere flujos incompletos.</p>
   </div>;
