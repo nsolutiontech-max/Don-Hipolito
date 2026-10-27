@@ -47,4 +47,7 @@ next-env.d.ts
 .atl/
 .engram/
 
+# Office temporary lock files
+~$*
+
 .vercel
