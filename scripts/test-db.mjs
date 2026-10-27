@@ -45,6 +45,16 @@ try {
       await db.query(readFileSync(path, 'utf8'));
     }
   }
+  const interviewTable = await db.query("select to_regclass('public.entrevistas') as present");
+  if (!interviewTable.rows[0].present) {
+    for (const path of ['supabase/migrations/007_entrevistas.sql', 'supabase/seed6_entrevistas.sql']) {
+      await db.query(readFileSync(path, 'utf8'));
+    }
+  }
+  const interviewCounts = (await db.query(`select
+    (select count(*) from public.entrevista_secciones)::int as sections,
+    (select count(*) from public.entrevista_criterios)::int as criteria`)).rows[0];
+  check(interviewCounts.sections === 6 && interviewCounts.criteria === 40, 'Interview template preserves 6 sections and 40 criteria');
   const auditRows = (await db.query('select id,bloque from public.auditoria_items order by orden')).rows;
   check(auditRows.length === 84, 'Audit template contains exactly 84 criteria');
   check(new Set(auditRows.map(row => row.bloque)).size === 2
@@ -103,6 +113,9 @@ try {
   await denied(saveSql, [sheet.BEBIDAS, '2099-01-03', JSON.stringify([{ producto_id: beverage, ubicacion: 'GENERAL', stock_real: 8 }]), '']);
   await denied('select public.crear_pedido_con_items($1)', [first]);
   check((await db.query('select * from public.auditoria_items')).rowCount === 0, 'CAMARERO cannot read audit criteria');
+  check((await db.query('select * from public.entrevista_criterios')).rowCount === 0, 'CAMARERO cannot read interview criteria');
+  await denied("insert into public.entrevistas(plantilla_id,fecha,candidato) values ($1,'2099-02-02','X')",
+    [randomUUID()], 'CAMARERO cannot create interviews');
   await denied('select public.guardar_auditoria($1::date,$1::date,$1::date,$2,$3,$4::jsonb)',
     ['2099-02-01', '', '', '[]'], 'CAMARERO cannot save audits');
   await actingAs(ids.ENCARGADO);
@@ -111,6 +124,7 @@ try {
   await denied("select public.completar_tarea($1,'2099-01-03','18:30','')", [kitchenTask]);
   await actingAs(ids.ENCARGADO);
   check((await db.query('select * from public.auditoria_items')).rowCount === 0, 'ENCARGADO cannot read audit criteria');
+  check((await db.query('select * from public.entrevista_criterios')).rowCount === 0, 'ENCARGADO cannot read interview criteria');
   check((await db.query('select * from public.planillas_inventario')).rowCount === 4, 'ENCARGADO sees four inventories');
   const inventory = (await save(sheet.STOCK_A, [{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 2, cantidad_pedida: 3, es_ajuste_manual: true }])).rows[0].id;
   const order = (await db.query('select public.crear_pedido_con_items($1) as id', [inventory])).rows[0].id;
@@ -146,6 +160,26 @@ try {
   await fails('select public.guardar_auditoria($1::date,$1::date,$1::date,$2,$3,$4::jsonb)',
     [auditDate, 'Cambio posterior', '', JSON.stringify(complete)], /Closed audits are immutable/i,
     'Closed audits reject further edits');
+  const interviewTemplate = (await db.query('select id from public.entrevista_plantillas where activa')).rows[0].id;
+  const interviewSection = (await db.query('select id from public.entrevista_secciones order by orden limit 1')).rows[0].id;
+  const interviewCriteria = (await db.query('select id from public.entrevista_criterios order by orden limit 2')).rows;
+  const interview = (await db.query(
+    "insert into public.entrevistas(plantilla_id,fecha,candidato,puesto_aspira,tecnica_actual,velocidad,decision) values ($1,'2099-03-01','Candidato de prueba','Cocina',4,3,'SI_CAPACITACION') returning id",
+    [interviewTemplate])).rows[0].id;
+  await db.query("insert into public.entrevista_seccion_respuestas(entrevista_id,seccion_id,resultado,observaciones) values ($1,$2,'MUY_BUENO','Bien general')", [interview, interviewSection]);
+  for (const [index, criterion] of interviewCriteria.entries()) {
+    await db.query("insert into public.entrevista_criterio_respuestas(entrevista_id,criterio_id,valor,observacion) values ($1,$2,$3,$4)",
+      [interview, criterion.id, index === 0, index === 0 ? 'Correcto' : '']);
+  }
+  const invalidCriterion = randomUUID();
+  await fails("insert into public.entrevista_criterio_respuestas(entrevista_id,criterio_id,valor) values ($1,$2,true)",
+    [interview, invalidCriterion], /does not belong/i, 'Interview responses reject criteria from another template');
+  const interviewActor = (await db.query('select evaluador_id,estado from public.entrevistas where id=$1', [interview])).rows[0];
+  check(interviewActor.evaluador_id === ids['DUEÑO'] && interviewActor.estado === 'BORRADOR',
+    'Interview evaluator derives from the authenticated owner');
+  check((await db.query('select * from public.entrevista_seccion_respuestas where entrevista_id=$1', [interview])).rowCount === 1
+    && (await db.query('select * from public.entrevista_criterio_respuestas where entrevista_id=$1', [interview])).rowCount === 2,
+  'Interview section and criterion responses persist independently');
   await actingAs(ids.CAMARERO, 'anon');
   await denied('select public.guardar_inventario($1,$2,$3::jsonb,$4)', [sheet.BEBIDAS, '2099-01-03', '[]', '']);
   await db.query('reset role');

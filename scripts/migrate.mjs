@@ -11,6 +11,8 @@ export const files = [
   'supabase/migrations/005_autoria_operativa.sql',
   'supabase/migrations/006_auditorias.sql',
   'supabase/seed5_auditoria.sql',
+  'supabase/migrations/007_entrevistas.sql',
+  'supabase/seed6_entrevistas.sql',
 ];
 
 const db = await connectDatabase();
