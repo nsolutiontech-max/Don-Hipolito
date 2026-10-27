@@ -11,6 +11,8 @@ export default async function AdminPage() {
     <div className="grid gap-3 sm:grid-cols-2">
       <Link className="panel hover:border-emerald-600" href="/auditorias"><p className="eyebrow">Control</p>
         <h2>Auditorías diarias</h2><p className="mt-2 text-sm text-zinc-600">84 criterios de Cocina y Salón/General, con cierre firmado.</p></Link>
+      <Link className="panel hover:border-emerald-600" href="/entrevistas"><p className="eyebrow">Recursos humanos</p>
+        <h2>Entrevistas prácticas</h2><p className="mt-2 text-sm text-zinc-600">Evaluación privada por candidato con decisión final.</p></Link>
       <div className="panel" aria-disabled="true"><p className="eyebrow">Planificado</p><h2>Compras y costos</h2>
         <p className="mt-2 text-sm text-zinc-600">Ranking de compras, evolución de precios y recetas. Plan en <code>Docs/hipolito-analitica-compras-costos.md</code>.</p></div>
       <div className="panel" aria-disabled="true"><p className="eyebrow">Planificado</p><h2>Exportar e imprimir</h2>

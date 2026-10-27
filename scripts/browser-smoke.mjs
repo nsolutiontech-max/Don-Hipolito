@@ -90,6 +90,21 @@ async function scenario(page, credentials, role, date, base, screenshots) {
     await page.reload();
     ensure((await page.locator('main').innerText()).includes('Puntaje 83/84'), 'Closed audit did not preserve score');
     if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-auditoria-mobile.png` });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${base}/entrevistas`);
+    await page.getByLabel('Candidato', { exact: true }).fill('Candidato de prueba');
+    await page.getByLabel('Puesto al que aspira', { exact: true }).fill('Cocina');
+    await page.getByRole('button', { name: 'Crear evaluación' }).click();
+    await page.waitForURL(/\/entrevistas\/[0-9a-f-]{36}$/);
+    await page.getByRole('heading', { name: 'Entrevista práctica' }).waitFor();
+    await page.getByRole('button', { name: 'Sí', exact: true }).first().click();
+    await page.getByRole('combobox', { name: 'Técnica actual', exact: true }).selectOption('4');
+    await page.getByRole('button', { name: 'Guardar evaluación', exact: true }).click();
+    await page.getByText('Evaluación guardada.').waitFor();
+    await page.reload();
+    ensure(await page.getByRole('button', { name: 'Sí', exact: true }).first().getAttribute('aria-pressed') === 'true',
+      'Interview response did not survive reload');
+    if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-entrevista-mobile.png` });
   }
   ensure(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Horizontal overflow on mobile');
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -146,6 +161,7 @@ try {
       await checked(admin.from('inventarios').delete().in('id', inventoryIds));
     }
     await checked(admin.from('auditorias').delete().eq('fecha', date));
+    if (temporaryUsers.length) await checked(admin.from('entrevistas').delete().in('evaluador_id', temporaryUsers));
     await checked(admin.from('actividad_registros').delete().eq('fecha', date));
   }
   for (const id of temporaryUsers) await checked(admin.auth.admin.deleteUser(id));

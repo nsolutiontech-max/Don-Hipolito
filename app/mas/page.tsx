@@ -9,6 +9,7 @@ export default async function MorePage() {
     <p className="font-semibold">{session.email}</p><p className="text-sm text-zinc-600">Rol: {session.rol}</p>
     {canOperate(session.rol) && <div className="flex flex-wrap gap-2"><Link className="button-secondary" href="/movimientos">Movimientos</Link><Link className="button-secondary" href="/pedidos">Pedidos</Link></div>}
     {session.rol === "DUEÑO" && <div className="flex flex-wrap gap-2"><Link className="button-secondary" href="/auditorias">Auditorías</Link>
+      <Link className="button-secondary" href="/entrevistas">Entrevistas</Link>
       <Link className="button-secondary" href="/admin">Administración</Link></div>}
     <div><LogoutButton /></div>
   </div></div>;
