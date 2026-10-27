@@ -1,73 +1,42 @@
-// Aplica 001 + 002 + seeds contra la DB real usando DATABASE_URL de .env.local.
-// Uso: node scripts/migrate.mjs
-// Verifica el project ref en la URL antes de tocar nada.
-import { readFileSync } from "node:fs";
-import pg from "pg";
+// Existing installations only. Never rerun the legacy schema or estimated seeds.
+import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { connectDatabase } from './db.mjs';
 
-const ESPERADO_REF = "rceoboibijmwtxmevash";
+export const files = [
+  'supabase/migrations/003_planillas_diarias_roles.sql',
+  'supabase/seed3_planillas.sql',
+  'supabase/migrations/004_tareas_diarias.sql',
+  'supabase/seed4_tareas.sql',
+  'supabase/migrations/005_autoria_operativa.sql',
+  'supabase/migrations/006_auditorias.sql',
+  'supabase/seed5_auditoria.sql',
+];
 
-function cargarEnv(path) {
-  const env = {};
-  for (const line of readFileSync(path, "utf8").split("\n")) {
-    const m = line.match(/^([^=]+)=(.*)$/);
-    if (m) env[m[1].trim()] = m[2].trim();
-  }
-  return env;
-}
-
-const env = cargarEnv(".env.local");
-// Pooler IPv4 primero (el host direct es IPv6-only y Node no lo resuelve acá).
-const url = env.POOLER_URL || env.DATABASE_URL;
-if (!url || !url.includes(ESPERADO_REF)) {
-  console.error(`REF VERIFICATION FAILED: la URL no contiene ${ESPERADO_REF}. Freno todo.`);
-  process.exit(1);
-}
-console.log(`Ref verificado: ${ESPERADO_REF}. Aplicando migraciones...`);
-
-const archivos = [
-  "supabase/migrations/001_schema.sql",
-  "supabase/migrations/002_seguridad_y_nuevas_tablas.sql",
-  "supabase/seed.sql",
-  "supabase/seed2.sql",
-].filter((f) => {
-  const solo = process.argv.slice(2);
-  return solo.length === 0 || solo.some((s) => f.includes(s));
-});
-if (archivos.length === 0) {
-  console.error("Nada para aplicar (filtro sin coincidencias).");
-  process.exit(1);
-}
-
-const pool = new pg.Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
-const client = await pool.connect();
+const db = await connectDatabase();
 try {
-  for (const f of archivos) {
-    const sql = readFileSync(f, "utf8");
-    await client.query("BEGIN");
-    try {
-      await client.query(sql);
-      await client.query("COMMIT");
-    } catch (e) {
-      await client.query("ROLLBACK");
-      throw new Error(`${f}: ${e.message}`);
+  await db.query('begin');
+  await db.query("select pg_advisory_xact_lock(hashtext('hipolito:migrations'))");
+  await db.query('create schema if not exists private');
+  await db.query('create table if not exists private.app_migrations(path text primary key, checksum text not null, applied_at timestamptz not null default now())');
+  for (const path of files) {
+    const sql = readFileSync(path, 'utf8');
+    const checksum = createHash('sha256').update(sql).digest('hex');
+    const previous = await db.query('select checksum from private.app_migrations where path=$1', [path]);
+    if (previous.rowCount) {
+      if (previous.rows[0].checksum !== checksum) throw new Error(`Applied migration changed: ${path}`);
+      console.log(`SKIP ${path}`);
+      continue;
     }
-    console.log(`OK: ${f}`);
+    await db.query(sql);
+    await db.query('insert into private.app_migrations(path,checksum) values ($1,$2)', [path, checksum]);
+    console.log(`OK ${path}`);
   }
-  const tablas = await client.query(
-    `select tablename from pg_tables where schemaname='public' order by tablename`,
-  );
-  console.log("TABLAS:", tablas.rows.map((r) => r.tablename).join(", "));
-  const conteos = await client.query(
-    `select 'categorias' t, count(*) from categorias
-     union all select 'productos', count(*) from productos
-     union all select 'responsables', count(*) from responsables
-     union all select 'actividades', count(*) from actividades`,
-  );
-  for (const r of conteos.rows) console.log(`COUNT ${r.t}: ${r.count}`);
-} catch (e) {
-  console.error("MIGRATION FAILED:", e.message);
+  await db.query('commit');
+} catch (error) {
+  await db.query('rollback');
+  console.error('Migration rolled back:', error.message);
   process.exitCode = 1;
 } finally {
-  client.release();
-  await pool.end();
+  await db.end();
 }

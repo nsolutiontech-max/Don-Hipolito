@@ -1,0 +1,2222 @@
+[
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Tomate Redondo",
+    "presentacion": "",
+    "orden": 1,
+    "celda": "sheet1!B8"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Tomate Cherry",
+    "presentacion": "",
+    "orden": 2,
+    "celda": "sheet1!B9"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Cebolla Común",
+    "presentacion": "",
+    "orden": 3,
+    "celda": "sheet1!B10"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Cebolla Morada",
+    "presentacion": "",
+    "orden": 4,
+    "celda": "sheet1!B11"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Cebolla de Verdeo",
+    "presentacion": "",
+    "orden": 5,
+    "celda": "sheet1!B12"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Apio",
+    "presentacion": "",
+    "orden": 6,
+    "celda": "sheet1!B13"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Lechuga",
+    "presentacion": "",
+    "orden": 7,
+    "celda": "sheet1!B14"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Rúcula",
+    "presentacion": "",
+    "orden": 8,
+    "celda": "sheet1!B15"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Morrones",
+    "presentacion": "",
+    "orden": 9,
+    "celda": "sheet1!B16"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Limón",
+    "presentacion": "",
+    "orden": 10,
+    "celda": "sheet1!B17"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Ajo",
+    "presentacion": "",
+    "orden": 11,
+    "celda": "sheet1!B18"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Albahaca",
+    "presentacion": "",
+    "orden": 12,
+    "celda": "sheet1!B19"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Laurel",
+    "presentacion": "",
+    "orden": 13,
+    "celda": "sheet1!B20"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Perejil",
+    "presentacion": "",
+    "orden": 14,
+    "celda": "sheet1!B21"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Choclo",
+    "presentacion": "",
+    "orden": 15,
+    "celda": "sheet1!B22"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Chaucha",
+    "presentacion": "",
+    "orden": 16,
+    "celda": "sheet1!B23"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Zapallo Anco",
+    "presentacion": "",
+    "orden": 17,
+    "celda": "sheet1!B24"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Zapallo Cabutia",
+    "presentacion": "",
+    "orden": 18,
+    "celda": "sheet1!B25"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Zanahoria",
+    "presentacion": "",
+    "orden": 19,
+    "celda": "sheet1!B26"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Remolacha",
+    "presentacion": "",
+    "orden": 20,
+    "celda": "sheet1!B27"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Berenjena",
+    "presentacion": "",
+    "orden": 21,
+    "celda": "sheet1!B28"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Papa",
+    "presentacion": "",
+    "orden": 22,
+    "celda": "sheet1!B29"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Batata",
+    "presentacion": "",
+    "orden": 23,
+    "celda": "sheet1!B30"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Puerro",
+    "presentacion": "",
+    "orden": 24,
+    "celda": "sheet1!B31"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Espinaca",
+    "presentacion": "",
+    "orden": 25,
+    "celda": "sheet1!B32"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Zuchini",
+    "presentacion": "",
+    "orden": 26,
+    "celda": "sheet1!B33"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Palta",
+    "presentacion": "",
+    "orden": 27,
+    "celda": "sheet1!B34"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Verdulería",
+    "seccion_orden": 1,
+    "categoria": "Verdulería",
+    "nombre": "Huevos",
+    "presentacion": "",
+    "orden": 28,
+    "celda": "sheet1!B35"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Aceites",
+    "seccion_orden": 2,
+    "categoria": "Aceites",
+    "nombre": "Aceite de Girasol",
+    "presentacion": "",
+    "orden": 29,
+    "celda": "sheet1!B36"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Aceites",
+    "seccion_orden": 2,
+    "categoria": "Aceites",
+    "nombre": "Aceite de Oliva",
+    "presentacion": "",
+    "orden": 30,
+    "celda": "sheet1!B37"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Aceites",
+    "seccion_orden": 2,
+    "categoria": "Aceites",
+    "nombre": "Aceite Freidora",
+    "presentacion": "",
+    "orden": 31,
+    "celda": "sheet1!B38"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Aceites",
+    "seccion_orden": 2,
+    "categoria": "Aceites",
+    "nombre": "Manteca",
+    "presentacion": "",
+    "orden": 32,
+    "celda": "sheet1!B39"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Aceites",
+    "seccion_orden": 2,
+    "categoria": "Aceites",
+    "nombre": "Grasa",
+    "presentacion": "",
+    "orden": 33,
+    "celda": "sheet1!B40"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Frutos Secos",
+    "seccion_orden": 3,
+    "categoria": "Frutos Secos",
+    "nombre": "Almendras",
+    "presentacion": "",
+    "orden": 34,
+    "celda": "sheet1!B41"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Frutos Secos",
+    "seccion_orden": 3,
+    "categoria": "Frutos Secos",
+    "nombre": "Nueces",
+    "presentacion": "",
+    "orden": 35,
+    "celda": "sheet1!B42"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Frutos Secos",
+    "seccion_orden": 3,
+    "categoria": "Frutos Secos",
+    "nombre": "Maní",
+    "presentacion": "",
+    "orden": 36,
+    "celda": "sheet1!B43"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Orégano",
+    "presentacion": "",
+    "orden": 37,
+    "celda": "sheet1!B44"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Ají Molido",
+    "presentacion": "",
+    "orden": 38,
+    "celda": "sheet1!B45"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Pimentón",
+    "presentacion": "",
+    "orden": 39,
+    "celda": "sheet1!B46"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Pimentón Ahumado",
+    "presentacion": "",
+    "orden": 40,
+    "celda": "sheet1!B47"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Nuez Moscada",
+    "presentacion": "",
+    "orden": 41,
+    "celda": "sheet1!B48"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Comino",
+    "presentacion": "",
+    "orden": 42,
+    "celda": "sheet1!B49"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Peperoncino",
+    "presentacion": "",
+    "orden": 43,
+    "celda": "sheet1!B50"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Pimienta Negra",
+    "presentacion": "",
+    "orden": 44,
+    "celda": "sheet1!B51"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Pimienta Blanca",
+    "presentacion": "",
+    "orden": 45,
+    "celda": "sheet1!B52"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Mix de Pimientas",
+    "presentacion": "",
+    "orden": 46,
+    "celda": "sheet1!B53"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Sal Fina",
+    "presentacion": "",
+    "orden": 47,
+    "celda": "sheet1!B54"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Sal Gruesa",
+    "presentacion": "",
+    "orden": 48,
+    "celda": "sheet1!B55"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Especias",
+    "seccion_orden": 4,
+    "categoria": "Especias",
+    "nombre": "Hongos de Pino",
+    "presentacion": "",
+    "orden": 49,
+    "celda": "sheet1!B56"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Masa",
+    "seccion_orden": 5,
+    "categoria": "Masa",
+    "nombre": "Tapas de Empanada",
+    "presentacion": "",
+    "orden": 50,
+    "celda": "sheet1!B57"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Masa",
+    "seccion_orden": 5,
+    "categoria": "Masa",
+    "nombre": "Bloques",
+    "presentacion": "",
+    "orden": 51,
+    "celda": "sheet1!B58"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Masa",
+    "seccion_orden": 5,
+    "categoria": "Masa",
+    "nombre": "Bollos",
+    "presentacion": "",
+    "orden": 52,
+    "celda": "sheet1!B59"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Harinas",
+    "seccion_orden": 6,
+    "categoria": "Harinas",
+    "nombre": "Harina 3C",
+    "presentacion": "",
+    "orden": 53,
+    "celda": "sheet1!B60"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Harinas",
+    "seccion_orden": 6,
+    "categoria": "Harinas",
+    "nombre": "Harina Integral",
+    "presentacion": "",
+    "orden": 54,
+    "celda": "sheet1!B61"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Harinas",
+    "seccion_orden": 6,
+    "categoria": "Harinas",
+    "nombre": "Sémola de trigo",
+    "presentacion": "",
+    "orden": 55,
+    "celda": "sheet1!B62"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Harinas",
+    "seccion_orden": 6,
+    "categoria": "Harinas",
+    "nombre": "Harina p/Fainá",
+    "presentacion": "",
+    "orden": 56,
+    "celda": "sheet1!B63"
+  },
+  {
+    "codigo": "STOCK_A",
+    "seccion": "Harinas",
+    "seccion_orden": 6,
+    "categoria": "Harinas",
+    "nombre": "Pan Rallado",
+    "presentacion": "",
+    "orden": 57,
+    "celda": "sheet1!B64"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Muzzarella A",
+    "presentacion": "",
+    "orden": 1,
+    "celda": "sheet2!B8"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Muzzarella B",
+    "presentacion": "",
+    "orden": 2,
+    "celda": "sheet2!B9"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Muzzarella C",
+    "presentacion": "",
+    "orden": 3,
+    "celda": "sheet2!B10"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Provolone",
+    "presentacion": "",
+    "orden": 4,
+    "celda": "sheet2!B11"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Provoleta",
+    "presentacion": "",
+    "orden": 5,
+    "celda": "sheet2!B12"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Provolone Ahumado",
+    "presentacion": "",
+    "orden": 6,
+    "celda": "sheet2!B13"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Reggianito",
+    "presentacion": "",
+    "orden": 7,
+    "celda": "sheet2!B14"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Gouda",
+    "presentacion": "",
+    "orden": 8,
+    "celda": "sheet2!B15"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Roquefort",
+    "presentacion": "",
+    "orden": 9,
+    "celda": "sheet2!B16"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Quesos",
+    "seccion_orden": 1,
+    "categoria": "Quesos",
+    "nombre": "Cheddar",
+    "presentacion": "",
+    "orden": 10,
+    "celda": "sheet2!B17"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Fiambres",
+    "seccion_orden": 2,
+    "categoria": "Fiambres",
+    "nombre": "Jamón Cocido",
+    "presentacion": "",
+    "orden": 11,
+    "celda": "sheet2!B18"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Fiambres",
+    "seccion_orden": 2,
+    "categoria": "Fiambres",
+    "nombre": "Jamón Crudo",
+    "presentacion": "",
+    "orden": 12,
+    "celda": "sheet2!B19"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Fiambres",
+    "seccion_orden": 2,
+    "categoria": "Fiambres",
+    "nombre": "Panceta Ahumada",
+    "presentacion": "",
+    "orden": 13,
+    "celda": "sheet2!B20"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Fiambres",
+    "seccion_orden": 2,
+    "categoria": "Fiambres",
+    "nombre": "Longaniza",
+    "presentacion": "",
+    "orden": 14,
+    "celda": "sheet2!B21"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Fiambres",
+    "seccion_orden": 2,
+    "categoria": "Fiambres",
+    "nombre": "Pepperoni",
+    "presentacion": "",
+    "orden": 15,
+    "celda": "sheet2!B22"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Milanesas",
+    "presentacion": "",
+    "orden": 16,
+    "celda": "sheet2!B23"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Papas Fritas",
+    "presentacion": "",
+    "orden": 17,
+    "celda": "sheet2!B24"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Salchichas",
+    "presentacion": "",
+    "orden": 18,
+    "celda": "sheet2!B25"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Pata Muslo",
+    "presentacion": "",
+    "orden": 19,
+    "celda": "sheet2!B26"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Alitas",
+    "presentacion": "",
+    "orden": 20,
+    "celda": "sheet2!B27"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Carne",
+    "presentacion": "",
+    "orden": 21,
+    "celda": "sheet2!B28"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Osobuco",
+    "presentacion": "",
+    "orden": 22,
+    "celda": "sheet2!B29"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Pollo",
+    "presentacion": "",
+    "orden": 23,
+    "celda": "sheet2!B30"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp Pollo DH",
+    "presentacion": "",
+    "orden": 24,
+    "celda": "sheet2!B31"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Humita",
+    "presentacion": "",
+    "orden": 25,
+    "celda": "sheet2!B32"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. JyQ",
+    "presentacion": "",
+    "orden": 26,
+    "celda": "sheet2!B33"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. PyC",
+    "presentacion": "",
+    "orden": 27,
+    "celda": "sheet2!B34"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Aurora",
+    "presentacion": "",
+    "orden": 28,
+    "celda": "sheet2!B35"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. Capresse",
+    "presentacion": "",
+    "orden": 29,
+    "celda": "sheet2!B36"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Emp. 3CyQ",
+    "presentacion": "",
+    "orden": 30,
+    "celda": "sheet2!B37"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Relleno Carne",
+    "presentacion": "",
+    "orden": 31,
+    "celda": "sheet2!B38"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Relleno Osobuco",
+    "presentacion": "",
+    "orden": 32,
+    "celda": "sheet2!B39"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Relleno Pollo",
+    "presentacion": "",
+    "orden": 33,
+    "celda": "sheet2!B40"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Congelados",
+    "seccion_orden": 3,
+    "categoria": "Congelados",
+    "nombre": "Relleno Humita",
+    "presentacion": "",
+    "orden": 34,
+    "celda": "sheet2!B41"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Nutella",
+    "presentacion": "",
+    "orden": 35,
+    "celda": "sheet2!B42"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Miel",
+    "presentacion": "",
+    "orden": 36,
+    "celda": "sheet2!B43"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Café en Grano",
+    "presentacion": "",
+    "orden": 37,
+    "celda": "sheet2!B44"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Bidones de Agua",
+    "presentacion": "",
+    "orden": 38,
+    "celda": "sheet2!B45"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Crema de Ajo",
+    "presentacion": "",
+    "orden": 39,
+    "celda": "sheet2!B46"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Salsa Golf",
+    "presentacion": "",
+    "orden": 40,
+    "celda": "sheet2!B47"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Barbacoa",
+    "presentacion": "",
+    "orden": 41,
+    "celda": "sheet2!B48"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Mostaza",
+    "presentacion": "",
+    "orden": 42,
+    "celda": "sheet2!B49"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Levadura",
+    "presentacion": "",
+    "orden": 43,
+    "celda": "sheet2!B50"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Aceitunas Verdes",
+    "presentacion": "",
+    "orden": 44,
+    "celda": "sheet2!B51"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Aceitunas Negras",
+    "presentacion": "",
+    "orden": 45,
+    "celda": "sheet2!B52"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Ciruelas Pasas",
+    "presentacion": "",
+    "orden": 46,
+    "celda": "sheet2!B53"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Cerezas",
+    "presentacion": "",
+    "orden": 47,
+    "celda": "sheet2!B54"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Ananá",
+    "presentacion": "",
+    "orden": 48,
+    "celda": "sheet2!B55"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Choclo",
+    "presentacion": "",
+    "orden": 49,
+    "celda": "sheet2!B56"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Palmitos",
+    "presentacion": "",
+    "orden": 50,
+    "celda": "sheet2!B57"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Boquerones",
+    "presentacion": "",
+    "orden": 51,
+    "celda": "sheet2!B58"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Vinagre",
+    "presentacion": "",
+    "orden": 52,
+    "celda": "sheet2!B59"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Latas de Tomate",
+    "presentacion": "",
+    "orden": 53,
+    "celda": "sheet2!B60"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Azucar Blanca",
+    "presentacion": "",
+    "orden": 54,
+    "celda": "sheet2!B61"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Azucar Mascabo",
+    "presentacion": "",
+    "orden": 55,
+    "celda": "sheet2!B62"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Salsa Chocolate",
+    "presentacion": "",
+    "orden": 56,
+    "celda": "sheet2!B63"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Leche en Polvo",
+    "presentacion": "",
+    "orden": 57,
+    "celda": "sheet2!B64"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Leche Larga Vida",
+    "presentacion": "",
+    "orden": 58,
+    "celda": "sheet2!B65"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Muzza Preparada",
+    "presentacion": "",
+    "orden": 59,
+    "celda": "sheet2!B66"
+  },
+  {
+    "codigo": "STOCK_B",
+    "seccion": "Varios",
+    "seccion_orden": 4,
+    "categoria": "Varios",
+    "nombre": "Salsa Preparada",
+    "presentacion": "",
+    "orden": 60,
+    "celda": "sheet2!B67"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Papel Aluminio",
+    "presentacion": "",
+    "orden": 1,
+    "celda": "sheet3!B8"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Papel Film",
+    "presentacion": "",
+    "orden": 2,
+    "celda": "sheet3!B9"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Folex",
+    "presentacion": "",
+    "orden": 3,
+    "celda": "sheet3!B10"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Dips Degustación",
+    "presentacion": "",
+    "orden": 4,
+    "celda": "sheet3!B11"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cherry Art 142 Micro",
+    "presentacion": "",
+    "orden": 5,
+    "celda": "sheet3!B12"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Omelette Art 146 Micro",
+    "presentacion": "",
+    "orden": 6,
+    "celda": "sheet3!B13"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Ensaladera  c/tapa",
+    "presentacion": "",
+    "orden": 7,
+    "celda": "sheet3!B14"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Bolsas de Arr. S (ver medida)",
+    "presentacion": "",
+    "orden": 8,
+    "celda": "sheet3!B15"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Bolsas de Arr. M (30x40)",
+    "presentacion": "",
+    "orden": 9,
+    "celda": "sheet3!B16"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Bolsas de Arr. L (40x50)",
+    "presentacion": "",
+    "orden": 10,
+    "celda": "sheet3!B17"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Bolsas de Arr. XL (60x90)",
+    "presentacion": "",
+    "orden": 11,
+    "celda": "sheet3!B18"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Bolsas Ziploc (ver medida)",
+    "presentacion": "",
+    "orden": 12,
+    "celda": "sheet3!B19"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cajas Pizza",
+    "presentacion": "",
+    "orden": 13,
+    "celda": "sheet3!B20"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cajas Emp x12",
+    "presentacion": "",
+    "orden": 14,
+    "celda": "sheet3!B21"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cajas Emp x6",
+    "presentacion": "",
+    "orden": 15,
+    "celda": "sheet3!B22"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Manteles Indiv.",
+    "presentacion": "",
+    "orden": 16,
+    "celda": "sheet3!B23"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Servilletas",
+    "presentacion": "",
+    "orden": 17,
+    "celda": "sheet3!B24"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cintas Rotuladas",
+    "presentacion": "",
+    "orden": 18,
+    "celda": "sheet3!B25"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Trípodes",
+    "presentacion": "",
+    "orden": 19,
+    "celda": "sheet3!B26"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Fondos de Pizza",
+    "presentacion": "",
+    "orden": 20,
+    "celda": "sheet3!B27"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Lapiceras",
+    "presentacion": "",
+    "orden": 21,
+    "celda": "sheet3!B28"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Comanderas p/mozos",
+    "presentacion": "",
+    "orden": 22,
+    "celda": "sheet3!B29"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Fibrones Indelebles",
+    "presentacion": "",
+    "orden": 23,
+    "celda": "sheet3!B30"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Papelería",
+    "seccion_orden": 1,
+    "categoria": "Papelería",
+    "nombre": "Cinta de Papel Ancha",
+    "presentacion": "",
+    "orden": 24,
+    "celda": "sheet3!B31"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Sobres Mayonesa",
+    "presentacion": "",
+    "orden": 25,
+    "celda": "sheet3!B32"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Sobres Mostaza",
+    "presentacion": "",
+    "orden": 26,
+    "celda": "sheet3!B33"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Sobres Ketchup",
+    "presentacion": "",
+    "orden": 27,
+    "celda": "sheet3!B34"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Guantes Nitrilo Talle M",
+    "presentacion": "",
+    "orden": 28,
+    "celda": "sheet3!B35"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Guantes Nitrilo Talle L",
+    "presentacion": "",
+    "orden": 29,
+    "celda": "sheet3!B36"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Varios",
+    "seccion_orden": 2,
+    "categoria": "Varios",
+    "nombre": "Guantes Nitrilo Talle XL",
+    "presentacion": "",
+    "orden": 30,
+    "celda": "sheet3!B37"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Felp Prof - Bobina",
+    "presentacion": "",
+    "orden": 31,
+    "celda": "sheet3!B38"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Felp Prof - Toalla p/mano",
+    "presentacion": "",
+    "orden": 32,
+    "celda": "sheet3!B39"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Felp Prof-Papel Higiénico Buje chico",
+    "presentacion": "",
+    "orden": 33,
+    "celda": "sheet3!B40"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Detergente",
+    "presentacion": "",
+    "orden": 34,
+    "celda": "sheet3!B41"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Jabón Líquido",
+    "presentacion": "",
+    "orden": 35,
+    "celda": "sheet3!B42"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Desengrasante",
+    "presentacion": "",
+    "orden": 36,
+    "celda": "sheet3!B43"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Quita Sarro",
+    "presentacion": "",
+    "orden": 37,
+    "celda": "sheet3!B44"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Alcohol",
+    "presentacion": "",
+    "orden": 38,
+    "celda": "sheet3!B45"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Desodorante Pisos",
+    "presentacion": "",
+    "orden": 39,
+    "celda": "sheet3!B46"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Citronela",
+    "presentacion": "",
+    "orden": 40,
+    "celda": "sheet3!B47"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Lavandina",
+    "presentacion": "",
+    "orden": 41,
+    "celda": "sheet3!B48"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Amonio Cuaternario",
+    "presentacion": "",
+    "orden": 42,
+    "celda": "sheet3!B49"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Bolsas de Residuo Transp.",
+    "presentacion": "",
+    "orden": 43,
+    "celda": "sheet3!B50"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Bolsas de Residuo Negras",
+    "presentacion": "",
+    "orden": 44,
+    "celda": "sheet3!B51"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Esponjas Comunes",
+    "presentacion": "",
+    "orden": 45,
+    "celda": "sheet3!B52"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Esponja 3M Densidad Gruesa",
+    "presentacion": "",
+    "orden": 46,
+    "celda": "sheet3!B53"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Esponja 3M Densidad Media",
+    "presentacion": "",
+    "orden": 47,
+    "celda": "sheet3!B54"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Paños Amarillos (Valerina)",
+    "presentacion": "",
+    "orden": 48,
+    "celda": "sheet3!B55"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Repasadores Comunes",
+    "presentacion": "",
+    "orden": 49,
+    "celda": "sheet3!B56"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Repasadores Guarda Franc.",
+    "presentacion": "",
+    "orden": 50,
+    "celda": "sheet3!B57"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Trapo Rejilla p/cocina",
+    "presentacion": "",
+    "orden": 51,
+    "celda": "sheet3!B58"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Trapos de Piso",
+    "presentacion": "",
+    "orden": 52,
+    "celda": "sheet3!B59"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Guantes Naranjas",
+    "presentacion": "",
+    "orden": 53,
+    "celda": "sheet3!B60"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Lustra Muebles",
+    "presentacion": "",
+    "orden": 54,
+    "celda": "sheet3!B61"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Franela",
+    "presentacion": "",
+    "orden": 55,
+    "celda": "sheet3!B62"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Cif",
+    "presentacion": "",
+    "orden": 56,
+    "celda": "sheet3!B63"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Limpia Vidrio",
+    "presentacion": "",
+    "orden": 57,
+    "celda": "sheet3!B64"
+  },
+  {
+    "codigo": "STOCK_C",
+    "seccion": "Limpieza",
+    "seccion_orden": 3,
+    "categoria": "Limpieza",
+    "nombre": "Escoba",
+    "presentacion": "",
+    "orden": 58,
+    "celda": "sheet3!B65"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Coca-Cola Original",
+    "presentacion": "350 cc",
+    "orden": 1,
+    "celda": "sheet8!B7"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Coca-Cola Zero",
+    "presentacion": "350 cc",
+    "orden": 2,
+    "celda": "sheet8!B8"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Sprite",
+    "presentacion": "350 cc",
+    "orden": 3,
+    "celda": "sheet8!B9"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Sprite Zero",
+    "presentacion": "350 cc",
+    "orden": 4,
+    "celda": "sheet8!B10"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Fanta",
+    "presentacion": "350 cc",
+    "orden": 5,
+    "celda": "sheet8!B11"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Schweppes Tónica",
+    "presentacion": "350 cc",
+    "orden": 6,
+    "celda": "sheet8!B12"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "350cc",
+    "seccion_orden": 1,
+    "categoria": "Bebidas",
+    "nombre": "Schweppes Pomelo",
+    "presentacion": "350 cc",
+    "orden": 7,
+    "celda": "sheet8!B13"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Agua Sin Gas",
+    "presentacion": "500 cc",
+    "orden": 8,
+    "celda": "sheet8!B14"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Agua Con Gas",
+    "presentacion": "500 cc",
+    "orden": 9,
+    "celda": "sheet8!B15"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Aquarius Pomelo",
+    "presentacion": "500 cc",
+    "orden": 10,
+    "celda": "sheet8!B16"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Aquarius Manzana",
+    "presentacion": "500 cc",
+    "orden": 11,
+    "celda": "sheet8!B17"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Aquarius Pera",
+    "presentacion": "500 cc",
+    "orden": 12,
+    "celda": "sheet8!B18"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "500cc",
+    "seccion_orden": 2,
+    "categoria": "Bebidas",
+    "nombre": "Aquarius Uva",
+    "presentacion": "500 cc",
+    "orden": 13,
+    "celda": "sheet8!B19"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Coca-Cola Original",
+    "presentacion": "1 L",
+    "orden": 14,
+    "celda": "sheet8!B20"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Coca-Cola Zero",
+    "presentacion": "1 L",
+    "orden": 15,
+    "celda": "sheet8!B21"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Sprite",
+    "presentacion": "1 L",
+    "orden": 16,
+    "celda": "sheet8!B22"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Sprite Zero",
+    "presentacion": "1 L",
+    "orden": 17,
+    "celda": "sheet8!B23"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Schweppes Pomelo",
+    "presentacion": "1 L",
+    "orden": 18,
+    "celda": "sheet8!B24"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Agua Sin Gas",
+    "presentacion": "1 L",
+    "orden": 19,
+    "celda": "sheet8!B25"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Gaseosas · 1 L",
+    "seccion_orden": 3,
+    "categoria": "Bebidas",
+    "nombre": "Agua Con Gas",
+    "presentacion": "1 L",
+    "orden": 20,
+    "celda": "sheet8!B26"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Stella Artois",
+    "presentacion": "Lata",
+    "orden": 21,
+    "celda": "sheet8!B27"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Stella Artois Noire",
+    "presentacion": "Lata",
+    "orden": 22,
+    "celda": "sheet8!B28"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Stella Artois 0.0%",
+    "presentacion": "Lata",
+    "orden": 23,
+    "celda": "sheet8!B29"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Patagonia Lager del Sur",
+    "presentacion": "Lata",
+    "orden": 24,
+    "celda": "sheet8!B30"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Patagonia Amber Lager",
+    "presentacion": "Lata",
+    "orden": 25,
+    "celda": "sheet8!B31"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Patagonia 24,7",
+    "presentacion": "Lata",
+    "orden": 26,
+    "celda": "sheet8!B32"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Patagonia Vera IPA",
+    "presentacion": "Lata",
+    "orden": 27,
+    "celda": "sheet8!B33"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Quilmes Clásica",
+    "presentacion": "Lata",
+    "orden": 28,
+    "celda": "sheet8!B34"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Lata",
+    "seccion_orden": 4,
+    "categoria": "Bebidas",
+    "nombre": "Quilmes Stout",
+    "presentacion": "Lata",
+    "orden": 29,
+    "celda": "sheet8!B35"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cervezas · 1 L",
+    "seccion_orden": 5,
+    "categoria": "Bebidas",
+    "nombre": "Stella Artois",
+    "presentacion": "1 L",
+    "orden": 30,
+    "celda": "sheet8!B36"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cervezas · 1 L",
+    "seccion_orden": 5,
+    "categoria": "Bebidas",
+    "nombre": "Corona",
+    "presentacion": "1 L",
+    "orden": 31,
+    "celda": "sheet8!B37"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cervezas · 1 L",
+    "seccion_orden": 5,
+    "categoria": "Bebidas",
+    "nombre": "Quilmes Clásica",
+    "presentacion": "1 L",
+    "orden": 32,
+    "celda": "sheet8!B38"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cervezas · 1 L",
+    "seccion_orden": 5,
+    "categoria": "Bebidas",
+    "nombre": "Quilmes Stout",
+    "presentacion": "1 L",
+    "orden": 33,
+    "celda": "sheet8!B39"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Otro Loco Más",
+    "presentacion": "",
+    "orden": 34,
+    "celda": "sheet8!B40"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Novecento Malbec",
+    "presentacion": "",
+    "orden": 35,
+    "celda": "sheet8!B41"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Dante Robino Malbec",
+    "presentacion": "",
+    "orden": 36,
+    "celda": "sheet8!B42"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Dante Robino Chardonnay",
+    "presentacion": "",
+    "orden": 37,
+    "celda": "sheet8!B43"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Novecento Extra Brut",
+    "presentacion": "",
+    "orden": 38,
+    "celda": "sheet8!B44"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Novecento Extra Dulce",
+    "presentacion": "",
+    "orden": 39,
+    "celda": "sheet8!B45"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Trapiche Reserva Malbec",
+    "presentacion": "",
+    "orden": 40,
+    "celda": "sheet8!B46"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Trapiche Reserva Chardonnay",
+    "presentacion": "",
+    "orden": 41,
+    "celda": "sheet8!B47"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Trapiche Medalla Malbec",
+    "presentacion": "",
+    "orden": 42,
+    "celda": "sheet8!B48"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Vinos",
+    "seccion_orden": 6,
+    "categoria": "Bebidas",
+    "nombre": "Espumante Navarro Correas",
+    "presentacion": "",
+    "orden": 43,
+    "celda": "sheet8!B49"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Porrón",
+    "seccion_orden": 7,
+    "categoria": "Bebidas",
+    "nombre": "Stella Artois",
+    "presentacion": "Porrón",
+    "orden": 44,
+    "celda": "sheet8!B50"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Porrón",
+    "seccion_orden": 7,
+    "categoria": "Bebidas",
+    "nombre": "Corona",
+    "presentacion": "Porrón",
+    "orden": 45,
+    "celda": "sheet8!B51"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cajones",
+    "seccion_orden": 8,
+    "categoria": "Bebidas",
+    "nombre": "Cajones Vacíos Gaseosas",
+    "presentacion": "",
+    "orden": 46,
+    "celda": "sheet8!B52"
+  },
+  {
+    "codigo": "BEBIDAS",
+    "seccion": "Cajones",
+    "seccion_orden": 8,
+    "categoria": "Bebidas",
+    "nombre": "Cajones Vacíos Cerveza",
+    "presentacion": "",
+    "orden": 47,
+    "celda": "sheet8!B53"
+  }
+]

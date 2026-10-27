@@ -1,23 +1,13 @@
-import pg from 'pg';
-const { Client } = pg;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-const client = new Client({ 
-  connectionString: 'postgresql://postgres.rceoboibijmwtxmevash:Soljosefina2015.@aws-0-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require' 
-});
-async function run() {
-  await client.connect();
-  const q = async (label, sql) => {
-    const r = await client.query(sql);
-    console.log(label, JSON.stringify(r.rows));
-  };
-  await q('productos activos:', "select count(*) as total from productos where activo;");
-  await q('categorias:', "select count(*) as total from categorias;");
-  await q('responsables:', "select count(*) as total from responsables where activo;");
-  await q('usuarios:', "select count(*) as total from usuarios where activo;");
-  await q('actividades:', "select count(*) as total from actividades where activo;");
-  await q('inventarios:', "select count(*) as total from inventarios;");
-  await q('movimientos:', "select count(*) as total from movimientos;");
-  await q('pedidos:', "select count(*) as total from pedidos;");
-  await client.end();
+import { connectDatabase } from './db.mjs';
+
+const db = await connectDatabase();
+try {
+  const result = await db.query(`select p.codigo, count(i.id)::int as items
+    from public.planillas_inventario p left join public.planilla_items i on i.planilla_id=p.id
+    group by p.codigo order by p.codigo`);
+  console.table(result.rows);
+  const users = await db.query('select rol,count(*)::int as total from public.usuarios group by rol');
+  console.table(users.rows);
+} finally {
+  await db.end();
 }
-run().catch(e => { console.log('ERROR:', e.message); process.exit(1); });
