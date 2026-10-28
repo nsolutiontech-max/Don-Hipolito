@@ -56,6 +56,13 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
     await page.waitForURL(`${base}/pedidos?pedido=*`);
     await page.getByRole('heading', { name: 'Pedidos guardados' }).waitFor();
     ensure((await page.locator('pre').first().innerText()).includes('0.5'), 'Order did not use the persisted quantity');
+    const card = page.locator('article').first();
+    await card.getByRole('button', { name: 'Marcar enviado', exact: true }).click();
+    await card.getByText('ENVIADO', { exact: true }).waitFor();
+    await card.getByRole('button', { name: 'Marcar recibido', exact: true }).click();
+    await card.getByText('RECIBIDO', { exact: true }).waitFor();
+    await page.reload();
+    await page.locator('article').first().getByText('RECIBIDO', { exact: true }).waitFor();
   }
   await page.goto(`${base}/tareas/salon/${date}`);
   const task = page.locator('article').first();

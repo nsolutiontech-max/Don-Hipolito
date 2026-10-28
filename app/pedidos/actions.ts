@@ -15,3 +15,20 @@ export async function guardarPedido(inventoryId: string): Promise<{ ok: boolean;
     return { ok: true, id };
   } catch { return { ok: false, error: "No se pudo generar el pedido. Comprueba tu sesión y vuelve a intentar." }; }
 }
+
+const estadoPayload = z.object({ id: z.uuid(), estado: z.enum(["ENVIADO", "RECIBIDO"]) });
+
+export async function cambiarEstadoPedido(input: z.input<typeof estadoPayload>): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await exigirOperador();
+    const parsed = estadoPayload.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "Estado no válido." };
+    const db = await supabaseServer();
+    const { data, error } = await db.from("pedidos").update({ estado: parsed.data.estado })
+      .eq("id", parsed.data.id).select("id");
+    if (error) return { ok: false, error: "No se pudo actualizar el pedido." };
+    if (!data?.length) return { ok: false, error: "Pedido no encontrado o sin permiso." };
+    revalidatePath("/pedidos");
+    return { ok: true };
+  } catch { return { ok: false, error: "No se pudo actualizar el pedido." }; }
+}

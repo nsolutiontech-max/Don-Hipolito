@@ -12,7 +12,7 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Tareas Cocina Check | 49 ocurrencias diarias, hora, observaciones y autor |
 | Tareas Salón Check | 36 ocurrencias, incluidos los 10 controles de baños |
 | Tareas Salón | Consulta de las 20 definiciones de apertura/cierre y frecuencia |
-| Pedidos | Persistidos, asociados al inventario, creación transaccional e idempotente; exportación por WhatsApp |
+| Pedidos | Persistidos, asociados al inventario, creación transaccional e idempotente; estados PENDIENTE/ENVIADO/RECIBIDO desde el historial; filtros por estado y fecha; exportación por WhatsApp |
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
 | Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
 | Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
@@ -121,7 +121,7 @@ app/stock                     planillas y selección de fecha
 app/conteo/[planilla]/[fecha]  inventario diario; también acepta /hoy
 app/tareas                    áreas y referencia de frecuencias de Salón
 app/tareas/[area]/[fecha]      carga diaria y actualización de ocurrencias
-app/pedidos                   historial persistido y exportación WhatsApp
+app/pedidos                   historial persistido con estados, filtros y exportación WhatsApp
 app/movimientos               ingresos y egresos
 app/auditorias                auditoría diaria del dueño e historial
 app/entrevistas               evaluaciones prácticas privadas del dueño

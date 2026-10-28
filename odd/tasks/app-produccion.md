@@ -17,7 +17,7 @@ Objetivo: dejar la app lista para uso real del equipo, en orden de valor operati
 
 | Tarea | Alcance | Aceptación |
 |---|---|---|
-| B1 · Estados de pedidos | marcar ENVIADO/RECIBIDO desde `/pedidos`, historial con fecha/estado | estados persisten y aparecen en historial |
+| B1 · Estados de pedidos ✔ | marcar ENVIADO/RECIBIDO desde `/pedidos`, historial con fecha/estado | ✔ lint/build + smoke: marcado y persistencia tras recarga |
 | B2 · Cierre/reapertura de planillas | estado CERRADO bloquea edición; dueño puede reabrir con motivo auditado | cierre visible en `/hoy`; reabrir exige DUEÑO |
 | B3 · Progreso de tareas en `/hoy` | agregado de tareas Cocina/Salón en el resumen diario | contador fiel a registros del día |
 | B4 · Programador de frecuencias | semanal/según necesidad automático + vista semanal (referencia ya existe en `salon_frecuencias`) | tareas vencidas/pendientes se calculan solas |
