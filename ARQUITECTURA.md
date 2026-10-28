@@ -56,7 +56,7 @@ PWA / Next.js
 - `planillas_inventario`: Stock A, Stock B, Stock C y Bebidas.
 - `planilla_secciones`: agrupación y orden propios de cada planilla.
 - `planilla_items`: asociación con producto; la FK compuesta impide vincular una sección de otra planilla.
-- `inventarios`: fecha, planilla, observaciones, creador y última actualización.
+- `inventarios`: fecha, planilla, observaciones, creador y última actualización; estado de cierre con autoría (`ABIERTO`/`CERRADO`, `cerrado_por`, `cerrado_en`, motivo de reapertura). Triggers en BD rechazan la edición de una planilla cerrada y limitan la reapertura al dueño.
 - `inventario_detalles`: PK `(inventario_id, producto_id, ubicacion)`; ubicación `GENERAL`, `DEPOSITO` o `HELADERA`.
 
 La función `guardar_inventario` persiste cabecera y filas modificadas en una transacción. Rechaza productos o ubicaciones ajenos a la planilla. Cero significa stock contado; vacío significa pendiente. Las sugerencias se recalculan con el catálogo del servidor.
@@ -179,10 +179,10 @@ TLS se verifica por defecto. En esta red se necesitó la excepción explícita `
 - `npm test`: 6 pruebas de dominio.
 - `npm run test:catalog`: 3 pruebas contra las celdas del XLSX.
 - `npm run test:db`: 52 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
-- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, ABM de usuarios con alta de contraseña única, reseteo y desactivación, permisos por URL y logout; vistas de 390 y 1280 px.
+- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido con estados ENVIADO/RECIBIDO, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, ABM de usuarios con alta de contraseña única, reseteo y desactivación, cierre/reapertura de planilla por el dueño, permisos por URL y logout; vistas de 390 y 1280 px.
 
 Los escenarios de navegador crean registros en una fecha futura sin datos previos y un ENCARGADO temporal; los eliminan al terminar. No representan el primer día de uso real. La edición concurrente de la misma fila sigue siendo última escritura válida; no hay colaboración en tiempo real ni resolución automática de conflictos.
 
 ## Siguiente bloque
 
-Completar el ABM de planillas del dueño, el ciclo de estados de pedidos, cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto. El plan completo de pendientes vive en `odd/tasks/app-produccion.md`.
+Completar el ABM de planillas del dueño y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto. El plan completo de pendientes vive en `odd/tasks/app-produccion.md`.

@@ -19,6 +19,7 @@ export function DailyCountClient({ catalog, date, userId, responsible, initial }
   initial: { inventory: InventoryRecord | null; details: DetalleConteo[] };
 }) {
   const router = useRouter();
+  const cerrado = initial.inventory?.estado === "CERRADO";
   const beverages = catalog.sheet.modo === "STOCK_UBICACIONES";
   const locations: Location[] = beverages ? ["DEPOSITO", "HELADERA"] : ["GENERAL"];
   const [rows, setRows] = useState<Record<string, Row>>(() => Object.fromEntries(initial.details.map(d => [
@@ -141,7 +142,7 @@ export function DailyCountClient({ catalog, date, userId, responsible, initial }
     <label className="flex min-h-12 items-center gap-3 text-sm font-medium">
       <input type="checkbox" className="size-5 accent-emerald-700" checked={pendingOnly} onChange={e => setPendingOnly(e.target.checked)} />Mostrar sólo pendientes
     </label>
-    <fieldset disabled={saving || !ready || !!pendingDraft} className="space-y-3 disabled:opacity-60">
+    <fieldset disabled={saving || !ready || !!pendingDraft || cerrado} className="space-y-3 disabled:opacity-60">
       {catalog.sections.map(section => {
         const products = catalog.products.filter(p => p.seccion_id === section.id);
         const visible = products.filter(p => p.nombre.toLocaleLowerCase("es").includes(search.toLocaleLowerCase("es")) && (!pendingOnly || !complete(p.id)));
@@ -183,8 +184,8 @@ export function DailyCountClient({ catalog, date, userId, responsible, initial }
     <div className="action-bar">
       <p role="status" className="mb-2 text-sm">{message || (Object.keys(dirty).length ? "Hay cambios pendientes de guardar" : "Puedes guardar y retomar en cualquier momento")}</p>
       <div className="flex gap-2">
-        <button className="button-primary flex-1" disabled={saving || !ready || !!pendingDraft} onClick={() => save()}>{saving ? "Guardando…" : "Guardar inventario"}</button>
-        {!beverages && <button className="button-secondary flex-1" disabled={saving || !!pendingDraft || !ready || counted === 0} onClick={() => save(true)}>Generar pedido</button>}
+        <button className="button-primary flex-1" disabled={saving || !ready || !!pendingDraft || cerrado} onClick={() => save()}>{saving ? "Guardando…" : "Guardar inventario"}</button>
+        {!beverages && <button className="button-secondary flex-1" disabled={saving || !!pendingDraft || !ready || counted === 0 || cerrado} onClick={() => save(true)}>Generar pedido</button>}
       </div>
     </div>
   </div>;

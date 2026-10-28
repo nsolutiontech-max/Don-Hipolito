@@ -144,6 +144,16 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
     await newCard.getByText('Inactivo').waitFor({ timeout: 15000 });
     if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-usuarios-mobile.png` });
   }
+  // Owner-only closure and reopen of the daily sheet.
+  if (role === 'DUEÑO') {
+    await page.goto(`${base}/conteo/stock-a/${date}`);
+    await page.getByRole('button', { name: 'Cerrar día', exact: true }).click();
+    await page.getByText('Planilla cerrada', { exact: false }).waitFor({ timeout: 15000 });
+    ensure(await page.getByRole('button', { name: 'Guardar inventario', exact: true }).isDisabled(), 'Closed inventory still offered saving');
+    await page.getByLabel('Motivo de reapertura', { exact: false }).fill('Verificación puntual del recuento de la planilla');
+    await page.getByRole('button', { name: 'Reabrir día', exact: true }).click();
+    await page.getByRole('button', { name: 'Cerrar día', exact: true }).waitFor({ timeout: 15000 });
+  }
   ensure(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Horizontal overflow on mobile');
   await page.setViewportSize({ width: 1280, height: 900 });
   ensure(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Horizontal overflow on desktop');

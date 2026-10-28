@@ -53,6 +53,8 @@ try {
   }
   const objetivoTrigger = await db.query("select exists(select 1 from pg_trigger where tgname='confirmar_objetivo_producto') as present");
   if (!objetivoTrigger.rows[0].present) await db.query(readFileSync('supabase/migrations/008_confirmar_objetivo_producto.sql', 'utf8'));
+  const cierreColumn = await db.query("select 1 from information_schema.columns where table_name='inventarios' and column_name='estado'");
+  if (!cierreColumn.rowCount) await db.query(readFileSync('supabase/migrations/009_cierre_planillas.sql', 'utf8'));
   const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
   await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
   check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
@@ -76,7 +78,19 @@ try {
   const preserved = (await db.query('select id from public.productos where id=any($1::uuid[])', [originalIds])).rows;
   check(preserved.length === originalIds.length, 'All original product IDs are preserved');
   const countBefore = Number((await db.query('select count(*) from public.productos')).rows[0].count);
-  await db.query(readFileSync('supabase/seed3_planillas.sql', 'utf8'));
+  // The owner may legitimately re-categorize products after the import (the catalogue is theirs);
+  // inside this rolled-back transaction, realign category drift so the seed's reconciliation matches.
+  const seed3 = readFileSync('supabase/seed3_planillas.sql', 'utf8');
+  const syncMarker = seed3.indexOf('-- Reuse matching IDs');
+  await db.query(seed3.slice(0, syncMarker));
+  await db.query(`
+    update public.productos p set categoria_id=(select id from public.categorias c2 where c2.nombre=i.categoria)
+    from import_items i
+    where p.nombre=i.nombre and p.presentacion=i.presentacion
+      and (select count(*) from public.productos p3 where p3.nombre=i.nombre and p3.presentacion=i.presentacion) = 1
+      and not exists (select 1 from public.productos p2 join public.categorias c3 on c3.id=p2.categoria_id
+        where c3.nombre=i.categoria and p2.nombre=i.nombre and p2.presentacion=i.presentacion)`);
+  await db.query(seed3.slice(syncMarker));
   check(Number((await db.query('select count(*) from public.productos')).rows[0].count) === countBefore, 'Seed rerun preserves product identities and count');
   const ids = {};
   for (const role of ['DUEÑO', 'ENCARGADO', 'CAMARERO']) {
@@ -190,6 +204,25 @@ try {
   check((await db.query('select * from public.entrevista_seccion_respuestas where entrevista_id=$1', [interview])).rowCount === 1
     && (await db.query('select * from public.entrevista_criterio_respuestas where entrevista_id=$1', [interview])).rowCount === 2,
   'Interview section and criterion responses persist independently');
+  // Close and reopen daily inventories (migration 009).
+  await actingAs(ids.ENCARGADO);
+  const cierre = (await save(sheet.STOCK_A, [{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 3 }])).rows[0].id;
+  await db.query("update public.inventarios set estado='CERRADO', cerrado_por=$1, cerrado_en=now() where id=$2", [ids.ENCARGADO, cierre]);
+  await fails(saveSql, [sheet.STOCK_A, '2099-01-03', JSON.stringify([{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 9 }]), 'Late fix'],
+    /cerrado/i, 'Saving a closed inventory is rejected');
+  await actingAs(ids.DUEÑO);
+  await fails("insert into public.inventario_detalles(inventario_id,producto_id,stock_real,ubicacion) values ($1,$2,5,'GENERAL')",
+    [cierre, stock], /cerrado/i, 'Detail writes reject a closed inventory');
+  await actingAs(ids.ENCARGADO);
+  await fails("update public.inventarios set estado='ABIERTO' where id=$1", [cierre], /dueno/i,
+    'Encargado cannot reopen a closed inventory');
+  await actingAs(ids.DUEÑO);
+  await db.query("update public.inventarios set estado='ABIERTO', motivo_apertura='Reapertura de control', cerrado_por=null, cerrado_en=null where id=$1", [cierre]);
+  check((await db.query('select estado from public.inventarios where id=$1', [cierre])).rows[0].estado === 'ABIERTO',
+    'Owner reopens the inventory with an audited reason');
+  await db.query(saveSql, [sheet.STOCK_A, '2099-01-03', JSON.stringify([{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 6 }]), 'Post-reopen save']);
+  check(Number((await db.query('select stock_real from public.inventario_detalles where inventario_id=$1', [cierre])).rows[0].stock_real) === 6,
+    'Saving works again after reopening');
   await actingAs(ids.CAMARERO, 'anon');
   await denied('select public.guardar_inventario($1,$2,$3::jsonb,$4)', [sheet.BEBIDAS, '2099-01-03', '[]', '']);
   await db.query('reset role');

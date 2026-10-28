@@ -14,6 +14,7 @@ export const files = [
   'supabase/migrations/007_entrevistas.sql',
   'supabase/seed6_entrevistas.sql',
   'supabase/migrations/008_confirmar_objetivo_producto.sql',
+  'supabase/migrations/009_cierre_planillas.sql',
 ];
 
 const db = await connectDatabase();

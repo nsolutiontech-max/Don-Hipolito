@@ -29,4 +29,6 @@ export type InventoryCatalog = {
 };
 export type InventoryRecord = {
   id: string; fecha: string; planilla_id: string; observaciones: string; actualizado_en: string;
+  estado?: "ABIERTO" | "CERRADO";
+  cerrado_por?: string | null; cerrado_en?: string | null; motivo_apertura?: string;
 };

@@ -11,7 +11,7 @@ export default async function TodayPage() {
   const date = fechaHoy();
   const [items, counts] = await Promise.all([
     db.from("planilla_items").select("planilla_id,producto_id"),
-    db.from("inventarios").select("planilla_id,inventario_detalles(producto_id,stock_real,ubicacion)").eq("fecha", date),
+    db.from("inventarios").select("planilla_id,estado,inventario_detalles(producto_id,stock_real,ubicacion)").eq("fecha", date),
   ]);
   if (items.error || counts.error) throw new Error("No se pudo cargar el resumen diario.");
   const auditToday = await db.from("auditorias").select("id,estado,auditoria_respuestas(resultado)").eq("fecha", date).maybeSingle();
@@ -29,9 +29,10 @@ export default async function TodayPage() {
         const byProduct = new Map<string, number>();
         for (const d of details) if (d.stock_real !== null) byProduct.set(d.producto_id, (byProduct.get(d.producto_id) ?? 0) + 1);
         const done = [...byProduct.values()].filter(n => n === (sheet.codigo === "BEBIDAS" ? 2 : 1)).length;
+        const cerrado = counts.data.find(i => i.planilla_id === sheet.id)?.estado === "CERRADO";
         return <Link className="panel block hover:border-emerald-600" key={sheet.id} href={`/conteo/${sheetSlug(sheet.codigo)}/${date}`}>
           <p className="eyebrow">Inventario diario</p><h2>{sheet.nombre}</h2>
-          <p className="mt-3 text-sm tabular-nums">{done} / {total} artículos · {done === total && total > 0 ? "Completo" : done ? "En curso" : "Sin iniciar"}</p>
+          <p className="mt-3 text-sm tabular-nums">{done} / {total} artículos · {cerrado ? "Cerrado" : done === total && total > 0 ? "Completo" : done ? "En curso" : "Sin iniciar"}</p>
           <progress className="mt-2 w-full accent-emerald-700" value={done} max={total || 1} aria-label={`Progreso de ${sheet.nombre}`} />
         </Link>;
       })}
