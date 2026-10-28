@@ -1,6 +1,6 @@
 # Don Hipólito · Operaciones diarias
 
-Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden completar parcialmente y retomar a cualquier hora. Estado actualizado: **27 de octubre de 2026**.
+Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden completar parcialmente y retomar a cualquier hora. Estado actualizado: **28 de octubre de 2026**.
 
 ## Estado de implementación
 
@@ -16,7 +16,7 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
 | Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
 | Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
-| Administración | Hub del dueño con Auditorías, Entrevistas y ABM de catálogo; gestión de usuarios/planillas pendiente |
+| Administración | Hub del dueño con Auditorías, Entrevistas, ABM de catálogo y ABM de usuarios; gestión de planillas pendiente |
 | Cierre de planillas / reapertura | Pendiente; el bloque actual permite guardar y retomar, sin cierre automático |
 | Despliegue y aceptación en restaurante | Pendientes; las pruebas automatizadas no sustituyen un día real de operación |
 
@@ -127,6 +127,7 @@ app/auditorias                auditoría diaria del dueño e historial
 app/entrevistas               evaluaciones prácticas privadas del dueño
 app/admin                     hub del dueño y estado de pendientes
 app/admin/catalogo            ABM de productos: nombre, categoría, unidad, objetivos
+app/admin/usuarios            ABM de usuarios: alta, rol, responsable, reseteo de contraseña y activación
 app/mas                       perfil, accesos según rol y cierre de sesión
 lib/data.ts                   capa de lectura/autenticación sólo servidor
 lib/types.ts                  contratos compartidos
@@ -135,6 +136,7 @@ lib/tasks.ts                  consultas de tareas
 lib/audits.ts                 plantilla, respuestas e historial de auditoría
 lib/interviews.ts              plantilla, criterios e historial de entrevistas
 lib/catalog-admin.ts           ABM de catálogo sólo servidor
+lib/users-admin.ts             ABM de usuarios sólo servidor
 lib/constants.ts               unidades compartidas
 scripts/generar-seed3.py       extracción reproducible del XLSX
 scripts/generar-seed-auditoria.py extracción reproducible de los 84 criterios
@@ -177,10 +179,10 @@ TLS se verifica por defecto. En esta red se necesitó la excepción explícita `
 - `npm test`: 6 pruebas de dominio.
 - `npm run test:catalog`: 3 pruebas contra las celdas del XLSX.
 - `npm run test:db`: 52 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
-- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, permisos por URL y logout; vistas de 390 y 1280 px.
+- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, ABM de usuarios con alta de contraseña única, reseteo y desactivación, permisos por URL y logout; vistas de 390 y 1280 px.
 
 Los escenarios de navegador crean registros en una fecha futura sin datos previos y un ENCARGADO temporal; los eliminan al terminar. No representan el primer día de uso real. La edición concurrente de la misma fila sigue siendo última escritura válida; no hay colaboración en tiempo real ni resolución automática de conflictos.
 
 ## Siguiente bloque
 
-Completar el ABM de usuarios/planillas del dueño, el ciclo de estados de pedidos, cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto.
+Completar el ABM de planillas del dueño, el ciclo de estados de pedidos, cierre/reapertura y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto. El plan completo de pendientes vive en `odd/tasks/app-produccion.md`.

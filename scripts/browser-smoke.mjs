@@ -6,7 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { environment } from './db.mjs';
 
-async function scenario(page, credentials, role, date, base, screenshots, smokeProduct) {
+async function scenario(page, credentials, role, date, base, screenshots, smokeProduct, smokeEmail) {
   const ensure = (condition, message) => { if (!condition) throw new Error(message); };
   await page.context().clearCookies();
   await page.setViewportSize({ width: 390, height: 844 });
@@ -120,6 +120,22 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
     ensure(await row.getByLabel('Stock ideal (vacío = sin definir)').inputValue() === '5', 'Catalogue target did not survive reload');
     await row.getByText('objetivo confirmado').waitFor();
     if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-catalogo-mobile.png` });
+    await page.goto(`${base}/admin/usuarios`);
+    await page.getByRole('heading', { name: 'Gestión de usuarios' }).waitFor();
+    ensure(await page.locator('article').count() >= 5, 'User list is incomplete');
+    await page.locator('input[name="email"]').fill(smokeEmail);
+    await page.locator('select[name="rol"]').selectOption('ENCARGADO');
+    await page.locator('select[name="responsableId"]').selectOption({ label: 'Camarero' });
+    await page.getByRole('button', { name: 'Crear acceso' }).click();
+    const newCard = page.locator('article').filter({ hasText: smokeEmail });
+    await newCard.waitFor({ timeout: 15000 });
+    const shown = (await newCard.locator('code').textContent()) || '';
+    ensure(shown.trim().length >= 8, 'One-time password was not displayed');
+    await newCard.getByRole('button', { name: 'Resetear contraseña' }).click();
+    await newCard.locator('code', { hasNotText: shown.trim() }).waitFor({ timeout: 15000 });
+    await newCard.getByRole('button', { name: 'Desactivar' }).click();
+    await newCard.getByText('Inactivo').waitFor({ timeout: 15000 });
+    if (screenshots) await page.screenshot({ path: `${screenshots}/dueno-usuarios-mobile.png` });
   }
   ensure(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Horizontal overflow on mobile');
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -138,6 +154,7 @@ const temp = mkdtempSync(join(env.LOCALAPPDATA, 'Temp/opencode/hipolito-smoke-')
 let temporaryUsers = [];
 const date = `2099-11-${String(1 + randomBytes(1)[0] % 28).padStart(2, '0')}`;
 const smokeProduct = `ZZ Smoke ${randomBytes(4).toString('hex')}`;
+const smokeEmail = `ui-smoke-${randomBytes(4).toString('hex')}@donhipolito.com`;
 const checked = async promise => { const result = await promise; if (result.error) throw result.error; return result.data; };
 let reserved = false;
 try {
@@ -161,7 +178,7 @@ try {
     unidad_medida: 'POR_DEFINIR', stock_minimo: 0, stock_ideal: null, activo: true }));
   for (const [role, credentials] of [['CAMARERO', { email: env.CAMARERO_EMAIL, password: env.CAMARERO_SMOKE_PASSWORD || env.CAMARERO_TEMP_PASSWORD }], ['ENCARGADO', encargado], ['DUEÑO', dueno]]) {
     const file = join(temp, 'scenario.js');
-    writeFileSync(file, `async page => { const scenario = ${scenario.toString()}; return scenario(page, ${JSON.stringify(credentials)}, ${JSON.stringify(role)}, ${JSON.stringify(date)}, ${JSON.stringify(env.SMOKE_BASE_URL || 'http://localhost:3011')}, ${JSON.stringify(env.SMOKE_SCREENSHOT_DIR || null)}, ${JSON.stringify(smokeProduct)}); }`, { mode: 0o600 });
+    writeFileSync(file, `async page => { const scenario = ${scenario.toString()}; return scenario(page, ${JSON.stringify(credentials)}, ${JSON.stringify(role)}, ${JSON.stringify(date)}, ${JSON.stringify(env.SMOKE_BASE_URL || 'http://localhost:3011')}, ${JSON.stringify(env.SMOKE_SCREENSHOT_DIR || null)}, ${JSON.stringify(smokeProduct)}, ${JSON.stringify(smokeEmail)}); }`, { mode: 0o600 });
     const output = execFileSync(process.execPath, [cli, '-s=hipolito', '--raw', 'run-code', `--filename=${file}`], { cwd: temp, encoding: 'utf8', timeout: 120000 });
     console.log(output);
     if (!output.includes(`${role}: login, permissions`)) throw new Error('Browser scenario did not complete');
@@ -184,6 +201,9 @@ try {
     await checked(admin.from('actividad_registros').delete().eq('fecha', date));
     await checked(admin.from('productos').delete().eq('nombre', smokeProduct));
   }
+  const { data: listed } = await admin.auth.admin.listUsers();
+  const uiUser = listed?.users?.find(user => user.email === smokeEmail);
+  if (uiUser) await checked(admin.auth.admin.deleteUser(uiUser.id));
   for (const id of temporaryUsers) await checked(admin.auth.admin.deleteUser(id));
   rmSync(temp, { recursive: true, force: true });
 }

@@ -6,7 +6,7 @@ export default async function AdminPage() {
   const session = await pageSession();
   if (session.rol !== "DUEÑO") redirect("/hoy");
   return <div className="space-y-5">
-    <header><p className="eyebrow">Administración</p><h1>Panel del dueño</h1>
+    <header><p className="eyebrow">Administración</p><h1>Panel de Guille</h1>
       <p className="mt-2 text-zinc-600">Hola {session.responsable_nombre ?? session.email}. Accesos de control y gestión.</p></header>
     <div className="grid gap-3 sm:grid-cols-2">
       <Link className="panel hover:border-emerald-600" href="/auditorias"><p className="eyebrow">Control</p>
@@ -19,8 +19,10 @@ export default async function AdminPage() {
         <p className="mt-2 text-sm text-zinc-600">Descarga PDF por planilla y fecha después de completar todas las hojas.</p></div>
       <Link className="panel hover:border-emerald-600" href="/admin/catalogo"><p className="eyebrow">Gestión</p>
         <h2>Catálogo de productos</h2><p className="mt-2 text-sm text-zinc-600">Unidades, mínimos, objetivos y estado de cada artículo.</p></Link>
-      <div className="panel" aria-disabled="true"><p className="eyebrow">Pendiente</p><h2>Usuarios y planillas</h2>
-        <p className="mt-2 text-sm text-zinc-600">Crear cuentas, asignar roles/responsables y administrar secciones de planilla se administran todavía por base de datos.</p></div>
+      <Link className="panel hover:border-emerald-600" href="/admin/usuarios"><p className="eyebrow">Gestión</p>
+        <h2>Usuarios</h2><p className="mt-2 text-sm text-zinc-600">Altas, roles, responsables, reseteo de contraseña y estado de cuentas.</p></Link>
+      <div className="panel" aria-disabled="true"><p className="eyebrow">Pendiente</p><h2>Planillas</h2>
+        <p className="mt-2 text-sm text-zinc-600">Administrar secciones e ítems de cada planilla se hace todavía por base de datos.</p></div>
     </div>
     <p className="panel text-sm text-zinc-700">No mostrar como disponible lo planificado evita que el equipo opere flujos incompletos.</p>
   </div>;
