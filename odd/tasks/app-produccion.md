@@ -9,9 +9,9 @@ Objetivo: dejar la app lista para uso real del equipo, en orden de valor operati
 | Tarea | Alcance | Aceptación |
 |---|---|---|
 | A1 · ABM usuarios ✔ | `/admin/usuarios`: crear cuenta, rol, responsable, resetear contraseña (mostrar una vez), activar/desactivar con bloqueo de autocuenta | ✔ lint/build verdes + smoke DUEÑO (alta, reseteo, desactivación) |
-| A2 · ABM planillas | `/admin/planillas`: secciones e ítems por planilla (agregar/quitar/reordenar, alta/baja productos) | reordenar persiste y el conteo diario refleja cambios |
+| A2 · ABM planillas ✔ | `/admin/planillas`: secciones e ítems por planilla (agregar/quitar/reordenar, alta/baja productos) | ✔ 66 checks DB (reordenar persiste, archivar conserva historial) + smoke 3 roles |
 | A3 · ABM categorías | crear/editar/ordenar categorías globales | filtros de informes y optgroups actualizados |
-| A4 · ABM proveedores y compras | proveedores (alta/edición/estado) y registro de compras con precio, unidad y proveedor | compra queda ligada a proveedor y movimiento |
+| A4 · ABM proveedores y compras ✔ | proveedores (alta/edición/estado) y registro de compras con precio, unidad y proveedor | ✔ 66 checks DB (compra ligada a proveedor y movimiento) + smoke 3 roles |
 
 ## Fase B — Ciclo operativo
 

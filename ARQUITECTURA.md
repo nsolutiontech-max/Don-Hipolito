@@ -127,6 +127,9 @@ app/auditorias                auditoría diaria del dueño e historial
 app/entrevistas               evaluaciones prácticas privadas del dueño
 app/admin                     hub del dueño y estado de pendientes
 app/admin/catalogo            ABM de productos: nombre, categoría, unidad, objetivos
+app/admin/planillas           ABM de secciones e ítems por planilla, con archivado y orden
+app/admin/proveedores         ABM de proveedores: nombre, teléfono y estado
+app/admin/compras             registro de compras; cada una crea su movimiento de ingreso
 app/admin/usuarios            ABM de usuarios: alta, rol, responsable, reseteo de contraseña y activación
 app/mas                       perfil, accesos según rol y cierre de sesión
 lib/data.ts                   capa de lectura/autenticación sólo servidor
@@ -136,6 +139,8 @@ lib/tasks.ts                  consultas de tareas
 lib/audits.ts                 plantilla, respuestas e historial de auditoría
 lib/interviews.ts              plantilla, criterios e historial de entrevistas
 lib/catalog-admin.ts           ABM de catálogo sólo servidor
+lib/planillas-admin.ts         ABM de planillas sólo servidor
+lib/compras-admin.ts           proveedores, compras y productos para compras sólo servidor
 lib/users-admin.ts             ABM de usuarios sólo servidor
 lib/constants.ts               unidades compartidas
 scripts/generar-seed3.py       extracción reproducible del XLSX
@@ -159,6 +164,9 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 4. `006_auditorias.sql` + `seed5_auditoria.sql`: plantilla, borrador/cierre y permisos de auditoría.
 5. `007_entrevistas.sql` + `seed6_entrevistas.sql`: plantilla de evaluación práctica y acceso privado del dueño.
 6. `008_confirmar_objetivo_producto.sql`: trigger que confirma el objetivo al fijar `stock_ideal`.
+7. `009_cierre_planillas.sql`: estado ABIERTO/CERRADO con triggers de protección y reapertura auditada.
+8. `010_planillas_admin_compras.sql`: archivado y orden de planillas, RPCs de ABM y compra atómica con movimiento.
+9. `011_restore_unique_unarchive.sql`: restaura unicidades de upsert y reactiva filas archivadas en lugar de reinsertarlas.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
 
