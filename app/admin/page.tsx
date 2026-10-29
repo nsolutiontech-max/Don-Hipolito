@@ -25,6 +25,8 @@ export default async function AdminPage() {
         <h2>Usuarios</h2><p className="mt-2 text-sm text-zinc-600">Altas, roles, responsables, reseteo de contraseña y estado de cuentas.</p></Link>
       <Link className="panel hover:border-emerald-600" href="/admin/planillas"><p className="eyebrow">Gestión</p>
         <h2>Planillas</h2><p className="mt-2 text-sm text-zinc-600">Secciones, productos y orden de cada planilla; el conteo diario lo refleja al instante.</p></Link>
+      <Link className="panel hover:border-emerald-600" href="/admin/tareas"><p className="eyebrow">Gestión</p>
+        <h2>Frecuencias de tareas</h2><p className="mt-2 text-sm text-zinc-600">Tareas diarias, semanales o según necesidad; el progreso diario se calcula solo.</p></Link>
     </div>
     <p className="panel text-sm text-zinc-700">No mostrar como disponible lo planificado evita que el equipo opere flujos incompletos.</p>
   </div>;

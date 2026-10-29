@@ -72,10 +72,16 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
   await page.reload();
   await task.getByText('Hecha', { exact: true }).waitFor();
   ensure(await task.getByLabel('Hora realizada').inputValue() === '19:23', 'Task time did not survive reload');
-  await page.getByText(/1 \/ \d+ actividades registradas/).waitFor();
-  await page.getByRole('progressbar', { name: 'Progreso de tareas' }).waitFor();
+  await page.getByText(/Hoy: 1 \/ \d+ diarias registradas/).waitFor();
+  await page.getByRole('progressbar', { name: 'Progreso de tareas', exact: true }).waitFor();
   await page.goto(`${base}/hoy`);
   await page.getByRole('progressbar', { name: /Progreso de tareas de (Salón|Cocina)/ }).first().waitFor();
+  await page.goto(`${base}/tareas/semana`);
+  await page.getByRole('heading', { name: 'Vista semanal' }).waitFor();
+  if (role === 'DUEÑO') {
+    await page.goto(`${base}/admin/tareas`);
+    await page.getByRole('heading', { name: 'Frecuencias de tareas' }).waitFor();
+  }
   if (role === 'DUEÑO') {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${base}/auditorias/${date}`);

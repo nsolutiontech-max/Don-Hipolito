@@ -59,6 +59,8 @@ try {
   if (!planillaAdmin.rowCount) await db.query(readFileSync('supabase/migrations/010_planillas_admin_compras.sql', 'utf8'));
   const planillaUnique = await db.query("select 1 from pg_constraint where conname='planilla_items_planilla_id_producto_id_key'");
   if (!planillaUnique.rowCount) await db.query(readFileSync('supabase/migrations/011_restore_unique_unarchive.sql', 'utf8'));
+  const frecuenciaColumn = await db.query("select 1 from information_schema.columns where table_name='actividad_programaciones' and column_name='frecuencia'");
+  if (!frecuenciaColumn.rowCount) await db.query(readFileSync('supabase/migrations/012_frecuencias_tareas.sql', 'utf8'));
   const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
   await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
   check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
@@ -116,6 +118,14 @@ try {
   const salonTasks = (await db.query('select * from public.actividad_programaciones order by orden')).rows;
   check(salonTasks.length === 36, 'CAMARERO sees only 36 dining-room occurrences');
   check((await db.query('select * from public.salon_frecuencias')).rowCount === 20, 'CAMARERO can read opening/closing frequencies');
+  const weeklyTask = (await db.query(`select p.id from public.actividad_programaciones p join public.actividades a on a.id=p.actividad_id
+    where a.area='SALON' and a.nombre='Limpieza Vidrios Internos/Externos' limit 1`)).rows[0].id;
+  const optionalTask = (await db.query(`select p.id from public.actividad_programaciones p join public.actividades a on a.id=p.actividad_id
+    where a.area='SALON' and a.nombre='Armado de Cajas Pizza' limit 1`)).rows[0].id;
+  check((await db.query('select frecuencia from public.actividad_programaciones where id=$1', [weeklyTask])).rows[0].frecuencia === 'SEMANAL',
+    'Weekly source reference is derived as SEMANAL');
+  check((await db.query('select frecuencia from public.actividad_programaciones where id=$1', [optionalTask])).rows[0].frecuencia === 'SEGUN_NECESIDAD',
+    'On-demand source reference is derived as SEGUN_NECESIDAD');
   const bath = salonTasks.filter(task => task.hora_objetivo);
   check(bath.length === 10 && bath.some(task => task.hora_objetivo === '24:00'), 'Ten bathroom slots preserve the source midnight reference');
   for (const task of bath.slice(0, 2)) {
@@ -127,6 +137,20 @@ try {
   await db.query("update public.actividad_registros set responsable_id=$1 where programacion_id=$2 and fecha='2099-01-03'", [originalResponsible, bath[0].id]);
   const actor = (await db.query("select responsable_id,actualizado_por from public.actividad_registros where programacion_id=$1 and fecha='2099-01-03'", [bath[0].id])).rows[0];
   check(actor.responsable_id === null && actor.actualizado_por === ids.CAMARERO, 'Direct writes cannot spoof a task responsible or authenticated author');
+  const firstWeekly = (await db.query("select public.completar_tarea($1,'2099-01-05','10:00','Primera') as id", [weeklyTask])).rows[0].id;
+  const secondWeekly = (await db.query("select public.completar_tarea($1,'2099-01-07','11:00','Actualizada') as id", [weeklyTask])).rows[0].id;
+  check(firstWeekly === secondWeekly, 'Weekly task reuses one record within the same ISO week');
+  const weeklyRecord = (await db.query("select fecha::text as fecha,hora::text as hora,nota from public.actividad_registros where id=$1", [firstWeekly])).rows[0];
+  check(weeklyRecord.fecha === '2099-01-05' && weeklyRecord.hora === '11:00:00' && weeklyRecord.nota === 'Actualizada',
+    'Weekly updates keep the completion day and refresh hour and note');
+  check((await db.query('select * from public.actividad_registros where programacion_id=$1', [weeklyTask])).rowCount === 1,
+    'Weekly task cannot create a second record in the same week');
+  const weeklyActivity = (await db.query('select actividad_id from public.actividad_programaciones where id=$1', [weeklyTask])).rows[0].actividad_id;
+  await fails("insert into public.actividad_registros(actividad_id,programacion_id,fecha,hora,actualizado_por) values ($1,$2,'2099-01-06','09:00',$3)",
+    [weeklyActivity, weeklyTask, ids.CAMARERO], /ya tiene un registro/i, 'Direct writes cannot duplicate a weekly record');
+  await db.query("select public.completar_tarea($1,'2099-01-03','12:00','Opcional')", [optionalTask]);
+  check((await db.query("select * from public.actividad_registros where programacion_id=$1 and fecha='2099-01-03'", [optionalTask])).rowCount === 1,
+    'On-demand task accepts a daily record');
   const details = [{ producto_id: beverage, ubicacion: 'DEPOSITO', stock_real: 0 }, { producto_id: beverage, ubicacion: 'HELADERA', stock_real: 5 }];
   const first = (await save(sheet.BEBIDAS, details)).rows[0].id;
   const second = (await save(sheet.BEBIDAS, details)).rows[0].id;
@@ -147,6 +171,8 @@ try {
   await actingAs(ids.CAMARERO);
   await denied("select public.completar_tarea($1,'2099-01-03','18:30','')", [kitchenTask]);
   await actingAs(ids.ENCARGADO);
+  const encargadoFrecuencia = await db.query("update public.actividad_programaciones set frecuencia='SEMANAL' where id=$1", [weeklyTask]);
+  check(encargadoFrecuencia.rowCount === 0, 'ENCARGADO cannot change task frequencies');
   check((await db.query('select * from public.auditoria_items')).rowCount === 0, 'ENCARGADO cannot read audit criteria');
   check((await db.query('select * from public.entrevista_criterios')).rowCount === 0, 'ENCARGADO cannot read interview criteria');
   const encargadoCatalogo = await db.query("update public.productos set activo = true where id=$1", [targetProduct]);
@@ -159,6 +185,9 @@ try {
   check(Number((await db.query('select cantidad from public.pedido_items where pedido_id=$1', [order])).rows[0].cantidad) === 3, 'Order quantities derive from persisted counts');
   await actingAs(ids.DUEÑO);
   check((await db.query('select * from public.usuarios')).rowCount >= 3, 'DUEÑO retains user management access');
+  const duenoFrecuencia = await db.query("update public.actividad_programaciones set frecuencia='DIARIA' where id=$1", [weeklyTask]);
+  check(duenoFrecuencia.rowCount === 1, 'DUEÑO can change task frequencies');
+  await db.query("update public.actividad_programaciones set frecuencia='SEMANAL' where id=$1", [weeklyTask]);
   const duenoCatalogo = await db.query("update public.productos set activo = activo where id=$1", [targetProduct]);
   check(duenoCatalogo.rowCount === 1, 'DUEÑO can edit the catalogue');
   const criteria = (await db.query('select id from public.auditoria_items order by orden')).rows.map(row => row.id);

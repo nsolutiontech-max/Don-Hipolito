@@ -1,6 +1,6 @@
 # Don Hipólito · Operaciones diarias
 
-Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden completar parcialmente y retomar a cualquier hora. Estado actualizado: **28 de octubre de 2026**.
+Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden completar parcialmente y retomar a cualquier hora. Estado actualizado: **29 de octubre de 2026**.
 
 ## Estado de implementación
 
@@ -9,15 +9,15 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Stock A / B / C | Implementados: 57 / 60 / 58 artículos del documento |
 | Reposición de Bebidas | Implementada: 47 artículos, cantidades independientes Depósito/Heladera y total |
 | Ingresos–Egresos | Registro de movimientos con responsable de sesión |
-| Tareas Cocina Check | 49 ocurrencias diarias, hora, observaciones y autor |
-| Tareas Salón Check | 36 ocurrencias, incluidos los 10 controles de baños |
-| Tareas Salón | Consulta de las 20 definiciones de apertura/cierre y frecuencia |
+| Tareas Cocina Check | 49 ocurrencias con hora, observaciones y autor; frecuencia diaria, semanal o según necesidad |
+| Tareas Salón Check | 36 ocurrencias, incluidos los 10 controles de baños; cálculo automático por frecuencia |
+| Tareas Salón | Consulta de las 20 definiciones de apertura/cierre y su frecuencia original |
 | Pedidos | Persistidos, asociados al inventario, creación transaccional e idempotente; estados PENDIENTE/ENVIADO/RECIBIDO desde el historial; filtros por estado y fecha; exportación por WhatsApp |
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
 | Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
 | Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
-| Administración | Hub del dueño con Auditorías, Entrevistas, ABM de catálogo y ABM de usuarios; gestión de planillas pendiente |
-| Cierre de planillas / reapertura | Pendiente; el bloque actual permite guardar y retomar, sin cierre automático |
+| Administración | Hub del dueño con Auditorías, Entrevistas, ABM de catálogo, planillas, proveedores, compras, frecuencias de tareas y usuarios |
+| Cierre de planillas / reapertura | Implementado: estado CERRADO, bloqueo de edición y reapertura auditada exclusiva del dueño (migración 009) |
 | Despliegue y aceptación en restaurante | Pendientes; las pruebas automatizadas no sustituyen un día real de operación |
 
 > El archivo `Docs/Planillas Digitalizables.pdf` contiene internamente el mismo XLSX que `Docs/Planillas Digitalizables.xlsx`. Se usó el contenido del libro, no OCR. `Docs/catalogo-conciliado.json` conserva las referencias de celda de los 222 artículos.
@@ -66,13 +66,13 @@ Los pedidos se crean mediante `crear_pedido_con_items(inventario_id)`: el navega
 ### Tareas
 
 - `actividades`: definiciones por área; los datos legados se conservan.
-- `actividad_programaciones`: 85 ocurrencias con código de origen, orden y horario de referencia cuando existe.
-- `actividad_registros`: unicidad por `(programacion_id, fecha)`; repetir la actividad en otra ocurrencia no pisa el registro anterior.
+- `actividad_programaciones`: 85 ocurrencias con código de origen, orden, horario de referencia y `frecuencia` (`DIARIA`, `SEMANAL`, `SEGUN_NECESIDAD`).
+- `actividad_registros`: unicidad por `(programacion_id, fecha)`; las semanales usan un solo registro por semana ISO y conservan el día en que se completaron.
 - `salon_frecuencias`: las 20 referencias de apertura/cierre de la hoja original, de consulta para CAMARERO.
 
 El horario `24:00` del documento se conserva como referencia textual. No es un bloqueo horario. Apertura y cierre son agrupaciones de tareas, no turnos de inventario.
 
-**Todavía no existe un planificador automático de frecuencias semanales/según necesidad.** La referencia original se muestra sin inventar equivalencias entre filas repetidas. Las planillas Check conservan sus ocurrencias originales.
+El planificador calcula por fecha: las diarias se piden todos los días; las semanales, una vez por semana ISO (se registran el día que se hacen y una actualización no duplica); las de “según necesidad” no suman al progreso obligatorio. `/tareas/semana` resume la semana y `/admin/tareas` permite al dueño ajustar cada frecuencia. La derivación inicial sólo promueve referencias inequívocas; el resto queda diaria para que el dueño lo defina sin inventar equivalencias.
 
 ### Auditoría
 
@@ -104,6 +104,7 @@ La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nu
 | Bebidas | Sí | Sí | Sí |
 | Tareas Cocina | Sí | Sí | No |
 | Tareas Salón y referencia de frecuencias | Sí | Sí | Sí |
+| Edición de frecuencias de tareas | Sí | No | No |
 | Movimientos / Pedidos / Compras / Proveedores | Sí | Sí | No |
 | Auditoría y plantilla de 84 criterios | Sí | No | No |
 | Catálogo y gestión de usuarios | Sí | No | No |
@@ -121,6 +122,7 @@ app/stock                     planillas y selección de fecha
 app/conteo/[planilla]/[fecha]  inventario diario; también acepta /hoy
 app/tareas                    áreas y referencia de frecuencias de Salón
 app/tareas/[area]/[fecha]      carga diaria y actualización de ocurrencias
+app/tareas/semana             resumen semanal por área: diarias por día y semanales
 app/pedidos                   historial persistido con estados, filtros y exportación WhatsApp
 app/movimientos               ingresos y egresos
 app/auditorias                auditoría diaria del dueño e historial
@@ -131,11 +133,12 @@ app/admin/planillas           ABM de secciones e ítems por planilla, con archiv
 app/admin/proveedores         ABM de proveedores: nombre, teléfono y estado
 app/admin/compras             registro de compras; cada una crea su movimiento de ingreso
 app/admin/usuarios            ABM de usuarios: alta, rol, responsable, reseteo de contraseña y activación
+app/admin/tareas              frecuencias de tareas: diaria, semanal o según necesidad
 app/mas                       perfil, accesos según rol y cierre de sesión
 lib/data.ts                   capa de lectura/autenticación sólo servidor
 lib/types.ts                  contratos compartidos
 lib/permissions.ts            permisos y conversión de rutas
-lib/tasks.ts                  consultas de tareas
+lib/tasks.ts                  consultas de tareas, frecuencias y resumen semanal
 lib/audits.ts                 plantilla, respuestas e historial de auditoría
 lib/interviews.ts              plantilla, criterios e historial de entrevistas
 lib/catalog-admin.ts           ABM de catálogo sólo servidor
@@ -168,6 +171,7 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 7. `009_cierre_planillas.sql`: estado ABIERTO/CERRADO con triggers de protección y reapertura auditada.
 8. `010_planillas_admin_compras.sql`: archivado y orden de planillas, RPCs de ABM y compra atómica con movimiento.
 9. `011_restore_unique_unarchive.sql`: restaura unicidades de upsert y reactiva filas archivadas en lugar de reinsertarlas.
+10. `012_frecuencias_tareas.sql`: frecuencia por ocurrencia, registro semanal único y derivación de referencias inequívocas.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
 
@@ -187,11 +191,11 @@ TLS se verifica por defecto. En esta red se necesitó la excepción explícita `
 - `npm run lint`: sin errores.
 - `npm test`: 6 pruebas de dominio.
 - `npm run test:catalog`: 3 pruebas contra las celdas del XLSX.
-- `npm run test:db`: 52 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
-- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido con estados ENVIADO/RECIBIDO, tareas, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, ABM de usuarios con alta de contraseña única, reseteo y desactivación, cierre/reapertura de planilla por el dueño, permisos por URL y logout; vistas de 390 y 1280 px.
+- `npm run test:db`: 75 comprobaciones reales de PostgreSQL/RLS; fixtures y escrituras se revierten.
+- Navegador Edge con Playwright: CAMARERO, ENCARGADO y DUEÑO; guardado/recarga, D/H con cero, recuperación de borrador, validación, pedido persistido con estados ENVIADO/RECIBIDO, tareas con progreso y vista semanal, auditoría con borrador y cierre 83 OK / 1 NO OK, creación/guardado/recarga de entrevista, ABM de catálogo con producto temporal y confirmación de objetivo, ABM de usuarios con alta de contraseña única, reseteo y desactivación, cierre/reapertura de planilla por el dueño, permisos por URL y logout; vistas de 390 y 1280 px.
 
 Los escenarios de navegador crean registros en una fecha futura sin datos previos y un ENCARGADO temporal; los eliminan al terminar. No representan el primer día de uso real. La edición concurrente de la misma fila sigue siendo última escritura válida; no hay colaboración en tiempo real ni resolución automática de conflictos.
 
 ## Siguiente bloque
 
-Completar el ABM de planillas del dueño y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto. El plan completo de pendientes vive en `odd/tasks/app-produccion.md`.
+Completar B5/B6 y validar un día completo con el equipo. La exportación PDF queda planificada para cuando todas las hojas estén implementadas. La analítica de compras/costos está registrada en `Docs/hipolito-analitica-compras-costos.md`. Con unidades y objetivos cargados, el pedido sugerido se activa producto por producto. El plan completo de pendientes vive en `odd/tasks/app-produccion.md`.

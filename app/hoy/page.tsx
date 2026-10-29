@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fechaHoy, getSheets, pageSession } from "@/lib/data";
-import { displayDate } from "@/lib/dates";
+import { displayDate, inicioSemana, sumarDias } from "@/lib/dates";
 import { sheetSlug } from "@/lib/permissions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -20,17 +20,27 @@ export default async function TodayPage() {
   const auditResponses = auditToday.data?.auditoria_respuestas ?? [];
   const auditAnswered = auditResponses.filter((item: { resultado: string | null }) => item.resultado).length;
   const auditOk = auditResponses.filter((item: { resultado: string | null }) => item.resultado === "OK").length;
+  const weekStart = inicioSemana(date);
+  const weekEnd = sumarDias(weekStart, 6);
   const [taskPrograms, taskRecords] = await Promise.all([
-    db.from("actividad_programaciones").select("id,actividades!inner(area)").eq("activo", true),
-    db.from("actividad_registros").select("programacion_id").eq("fecha", date),
+    db.from("actividad_programaciones").select("id,frecuencia,actividades!inner(area)").eq("activo", true),
+    db.from("actividad_registros").select("programacion_id,fecha").gte("fecha", weekStart).lte("fecha", weekEnd),
   ]);
   if (taskPrograms.error || taskRecords.error) throw new Error("No se pudo cargar el progreso de tareas.");
-  const recorded = new Set((taskRecords.data as { programacion_id: string }[]).map(record => record.programacion_id));
+  const programs = taskPrograms.data as unknown as { id: string; frecuencia: string; actividades: { area: string } | null }[];
+  const taskRecordsData = taskRecords.data as { programacion_id: string; fecha: string }[];
+  const today = new Set(taskRecordsData.filter(record => record.fecha === date).map(record => record.programacion_id));
+  const week = new Set(taskRecordsData.map(record => record.programacion_id));
   const taskAreas = (["COCINA", "SALON"] as const).map(area => {
-    const ids = (taskPrograms.data as unknown as { id: string; actividades: { area: string } | null }[])
-      .filter(row => row.actividades?.area === area).map(row => row.id);
-    return { area, total: ids.length, done: ids.filter(id => recorded.has(id)).length };
-  }).filter(group => group.total > 0);
+    const rows = programs.filter(row => row.actividades?.area === area);
+    const diarias = rows.filter(row => row.frecuencia === "DIARIA");
+    const semanales = rows.filter(row => row.frecuencia === "SEMANAL");
+    return {
+      area,
+      diarias: { total: diarias.length, done: diarias.filter(row => today.has(row.id)).length },
+      semanales: { total: semanales.length, done: semanales.filter(row => week.has(row.id)).length },
+    };
+  }).filter(group => group.diarias.total > 0 || group.semanales.total > 0);
   return <div className="space-y-5">
     <header><p className="eyebrow">{displayDate(date)}</p><h1>La operación de hoy</h1>
       <p className="mt-2 text-zinc-600">Una planilla por día. Guarda y continúa cuando lo necesites.</p></header>
@@ -55,11 +65,17 @@ export default async function TodayPage() {
           <h2>{session.rol === "CAMARERO" ? "Tareas del salón" : "Tareas de cocina y salón"}</h2></div>
         <Link className="text-sm font-semibold text-emerald-800 underline" href="/tareas">Ver tareas →</Link>
       </div>
-      {taskAreas.map(({ area, total: areaTotal, done: areaDone }) => {
+      {taskAreas.map(({ area, diarias, semanales }) => {
         const nombre = area === "COCINA" ? "Cocina" : "Salón";
-        return <div className="mt-3" key={area}>
-          <p className="text-sm tabular-nums">{nombre}: {areaDone} / {areaTotal} registradas</p>
-          <ProgressBar value={areaDone} max={areaTotal} label={`Progreso de tareas de ${nombre}`} />
+        return <div className="mt-3 space-y-2" key={area}>
+          {diarias.total > 0 && <>
+            <p className="text-sm tabular-nums">{nombre} · hoy: {diarias.done} / {diarias.total} diarias</p>
+            <ProgressBar value={diarias.done} max={diarias.total} label={`Progreso de tareas de ${nombre} de hoy`} />
+          </>}
+          {semanales.total > 0 && <>
+            <p className={`text-sm tabular-nums ${diarias.total ? "mt-2" : ""}`}>{nombre} · semana: {semanales.done} / {semanales.total} semanales</p>
+            <ProgressBar value={semanales.done} max={semanales.total} label={`Progreso de tareas semanales de ${nombre}`} />
+          </>}
         </div>;
       })}
       {!taskAreas.length && <p className="mt-2 text-sm text-zinc-600">No hay actividades programadas para hoy.</p>}
