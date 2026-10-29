@@ -8,6 +8,12 @@ export type Producto = {
   activo: boolean;
 };
 export type Responsable = { id: string; nombre: string };
+export type Proveedor = { id: string; nombre: string; telefono: string | null; activo: boolean };
+export type Compra = {
+  id: string; producto_id: string; proveedor_id: string | null; fecha: string;
+  cantidad: number; unidad_medida: string; precio_unitario: number;
+  responsable_id: string | null; movimiento_id: string | null;
+};
 export type DetalleConteo = {
   producto_id: string; ubicacion: Location; stock_real: number | null;
   cantidad_pedida: number | null; cantidad_sugerida?: number | null; es_ajuste_manual: boolean;

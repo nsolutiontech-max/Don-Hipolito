@@ -57,8 +57,8 @@ export async function getInventoryCatalog(code: SheetCode): Promise<InventoryCat
   if (error) throw new Error("No se pudo cargar la planilla.");
   if (!sheet) return null;
   const [sections, items] = await Promise.all([
-    db.from("planilla_secciones").select("id,nombre,orden").eq("planilla_id", sheet.id).order("orden"),
-    db.from("planilla_items").select("seccion_id,orden,productos(*)").eq("planilla_id", sheet.id).order("orden"),
+    db.from("planilla_secciones").select("id,nombre,orden").eq("planilla_id", sheet.id).eq("activo", true).order("orden"),
+    db.from("planilla_items").select("seccion_id,orden,productos(*)").eq("planilla_id", sheet.id).eq("activo", true).order("orden"),
   ]);
   if (sections.error || items.error) throw new Error("No se pudo cargar el catálogo de la planilla.");
   const products = items.data.map(item => ({

@@ -55,6 +55,10 @@ try {
   if (!objetivoTrigger.rows[0].present) await db.query(readFileSync('supabase/migrations/008_confirmar_objetivo_producto.sql', 'utf8'));
   const cierreColumn = await db.query("select 1 from information_schema.columns where table_name='inventarios' and column_name='estado'");
   if (!cierreColumn.rowCount) await db.query(readFileSync('supabase/migrations/009_cierre_planillas.sql', 'utf8'));
+  const planillaAdmin = await db.query("select 1 from information_schema.columns where table_name='planilla_items' and column_name='activo'");
+  if (!planillaAdmin.rowCount) await db.query(readFileSync('supabase/migrations/010_planillas_admin_compras.sql', 'utf8'));
+  const planillaUnique = await db.query("select 1 from pg_constraint where conname='planilla_items_planilla_id_producto_id_key'");
+  if (!planillaUnique.rowCount) await db.query(readFileSync('supabase/migrations/011_restore_unique_unarchive.sql', 'utf8'));
   const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
   await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
   check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
@@ -223,6 +227,48 @@ try {
   await db.query(saveSql, [sheet.STOCK_A, '2099-01-03', JSON.stringify([{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 6 }]), 'Post-reopen save']);
   check(Number((await db.query('select stock_real from public.inventario_detalles where inventario_id=$1', [cierre])).rows[0].stock_real) === 6,
     'Saving works again after reopening');
+  // Owner-managed planillas (migration 010).
+  await actingAs(ids['DUEÑO']);
+  const reorderTarget = (await db.query(`select i.planilla_id,i.seccion_id,array_agg(i.id order by i.orden) as ids
+    from public.planilla_items i join public.planillas_inventario p on p.id=i.planilla_id
+    where p.codigo='STOCK_A' and i.activo group by i.planilla_id,i.seccion_id having count(*) >= 2 limit 1`)).rows[0];
+  const reversed = [...reorderTarget.ids].reverse();
+  await db.query('select public.reordenar_items_planilla($1,$2,$3)', [reorderTarget.planilla_id, reorderTarget.seccion_id, reversed]);
+  const reorderedItems = (await db.query('select id,orden from public.planilla_items where id = any($1::uuid[]) order by orden', [reversed])).rows;
+  check(reorderedItems.map(row => row.id).join() === reversed.join()
+    && reorderedItems.every((row, index) => row.orden === index + 1),
+  'Owner reorders planilla items and the new order persists');
+  const freeProduct = (await db.query(`select id from public.productos p where p.activo and not exists (
+    select 1 from public.planilla_items i where i.planilla_id=$1 and i.producto_id=p.id and i.activo) limit 1`,
+    [reorderTarget.planilla_id])).rows[0].id;
+  const addedItem = (await db.query('select public.agregar_item_planilla($1,$2,$3) as id',
+    [reorderTarget.planilla_id, reorderTarget.seccion_id, freeProduct])).rows[0].id;
+  const addedRow = (await db.query('select activo,orden from public.planilla_items where id=$1', [addedItem])).rows[0];
+  check(addedRow.activo && Number(addedRow.orden) > 0, 'Owner adds a product to a planilla section');
+  await db.query('select public.archivar_item_planilla($1)', [addedItem]);
+  check((await db.query('select activo from public.planilla_items where id=$1', [addedItem])).rows[0].activo === false,
+    'Archiving a planilla item keeps the row for history');
+  await fails('select public.archivar_item_planilla($1)', [randomUUID()], /not found/i,
+    'Archiving an unknown planilla item is rejected');
+  // Providers and atomic purchases (migration 010).
+  const proveedor = (await db.query("insert into public.proveedores(nombre,telefono) values ('Proveedor Integración','555-0101') returning id")).rows[0].id;
+  await actingAs(ids.ENCARGADO);
+  const compraUno = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [stock, proveedor, 2.5, 'KG', 100.25, '2099-01-06T10:00:00Z'])).rows[0].id;
+  const compraDos = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [stock, proveedor, 2.5, 'KG', 100.25, '2099-01-06T10:00:00Z'])).rows[0].id;
+  check(compraUno !== compraDos, 'Repeated legitimate purchases are allowed');
+  const linked = (await db.query(`select c.proveedor_id,c.movimiento_id,m.tipo,m.cantidad,m.motivo
+    from public.compras c join public.movimientos m on m.id=c.movimiento_id where c.id=$1`, [compraUno])).rows[0];
+  check(linked.proveedor_id === proveedor && linked.tipo === 'INGRESO' && Number(linked.cantidad) === 2.5
+    && linked.motivo.includes('Proveedor Integración'), 'A purchase stays linked to its provider and INGRESO movement');
+  await actingAs(ids.CAMARERO);
+  await denied('select public.registrar_compra($1,$2,$3,$4,$5,$6)',
+    [stock, proveedor, 1, 'KG', 10, '2099-01-06T10:00:00Z']);
+  await denied("insert into public.proveedores(nombre) values ('Proveedor Clandestino')");
+  await actingAs(ids['DUEÑO']);
+  const proveedorEditado = await db.query("update public.proveedores set telefono='555-0202',activo=false where id=$1", [proveedor]);
+  check(proveedorEditado.rowCount === 1, 'Owner edits and deactivates a provider');
   await actingAs(ids.CAMARERO, 'anon');
   await denied('select public.guardar_inventario($1,$2,$3::jsonb,$4)', [sheet.BEBIDAS, '2099-01-03', '[]', '']);
   await db.query('reset role');
