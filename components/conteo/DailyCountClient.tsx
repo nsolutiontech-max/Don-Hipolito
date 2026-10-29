@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { guardarConteo } from "@/app/conteo/actions";
 import { guardarPedido } from "@/app/pedidos/actions";
 import { StockInput } from "@/components/conteo/StockInput";
+import { ProgressBar } from "@/components/ProgressBar";
 import { cantidadSugerida } from "@/lib/calculations";
 import { parsearCantidad } from "@/lib/quantity-parse";
 import { displayDate } from "@/lib/dates";
@@ -118,7 +119,7 @@ export function DailyCountClient({ catalog, date, userId, responsible, initial }
       <h1>{catalog.sheet.nombre}</h1>
       <p className="text-sm text-zinc-600">{responsible} · Una planilla por día, sin turnos.</p>
       <p className="mt-3 font-semibold tabular-nums">{counted} de {catalog.products.length} artículos completos</p>
-      <progress className="mt-2 h-2 w-full accent-emerald-700" value={counted} max={catalog.products.length} aria-label="Progreso del inventario" />
+      <ProgressBar value={counted} max={catalog.products.length} label="Progreso del inventario" />
     </header>
     {pendingDraft && <section className="panel border-amber-400 bg-amber-50" aria-label="Borrador disponible">
       <h2>Hay cambios sin guardar en este dispositivo</h2>

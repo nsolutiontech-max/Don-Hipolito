@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { guardarEntrevista } from "@/app/entrevistas/actions";
+import { ProgressBar } from "@/components/ProgressBar";
 import { displayDate } from "@/lib/dates";
 import type { Interview, InterviewBundle, InterviewSectionResponse } from "@/lib/interviews";
 
@@ -64,7 +65,7 @@ export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle
       <div className="flex flex-wrap items-start justify-between gap-2"><h1>Entrevista práctica</h1>
         <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700">{interview.estado}</span></div>
       <p className="mt-2 text-sm text-zinc-600">Evaluador: {evaluatorName} · {answered}/{data.criteria.length} criterios respondidos</p>
-      <progress className="mt-3 w-full accent-emerald-700" value={answered} max={data.criteria.length || 1} aria-label="Progreso de evaluación" />
+      <ProgressBar value={answered} max={data.criteria.length} label="Progreso de evaluación" />
     </header>
     <section className="panel grid gap-3 sm:grid-cols-2">
       <label><span className="mb-1 block text-sm font-medium">Candidato</span>

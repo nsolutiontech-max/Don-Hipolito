@@ -72,6 +72,10 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
   await page.reload();
   await task.getByText('Hecha', { exact: true }).waitFor();
   ensure(await task.getByLabel('Hora realizada').inputValue() === '19:23', 'Task time did not survive reload');
+  await page.getByText(/1 \/ \d+ actividades registradas/).waitFor();
+  await page.getByRole('progressbar', { name: 'Progreso de tareas' }).waitFor();
+  await page.goto(`${base}/hoy`);
+  await page.getByRole('progressbar', { name: /Progreso de tareas de (Salón|Cocina)/ }).first().waitFor();
   if (role === 'DUEÑO') {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${base}/auditorias/${date}`);
@@ -161,7 +165,7 @@ async function scenario(page, credentials, role, date, base, screenshots, smokeP
   await page.getByRole('button', { name: 'Salir', exact: true }).last().click();
   await page.waitForURL(`${base}/login`);
   ensure(await page.evaluate(() => !Object.keys(localStorage).some(key => key.startsWith('hipolito'))), 'Logout retained a local draft');
-  return `${role}: login, permissions, daily save/reload, tasks, responsive layout and logout passed`;
+  return `${role}: login, permissions, daily save/reload, tasks with progress, responsive layout and logout passed`;
 }
 
 const env = environment();

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { completeTask } from "@/app/tareas/actions";
+import { ProgressBar } from "@/components/ProgressBar";
 import type { TaskDefinition, TaskRecord } from "@/lib/tasks";
 
 function TaskRow({ task, record, date }: { task: TaskDefinition; record?: TaskRecord; date: string }) {
@@ -42,7 +43,7 @@ export function TaskList({ tasks, records, date }: { tasks: TaskDefinition[]; re
   const visible = tasks.filter(task => task.actividades.nombre.toLocaleLowerCase("es").includes(search.toLocaleLowerCase("es")) && (!pendingOnly || !recordMap.has(task.id)));
   const done = tasks.filter(task => recordMap.has(task.id)).length;
   return <div className="space-y-3"><div className="panel"><p className="font-semibold tabular-nums">{done} / {tasks.length} actividades registradas</p>
-    <progress className="mt-2 w-full accent-emerald-700" value={done} max={tasks.length || 1} aria-label="Progreso de tareas" /></div>
+    <ProgressBar value={done} max={tasks.length} label="Progreso de tareas" /></div>
     <label className="block"><span className="sr-only">Buscar tarea</span><input className="field" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar tarea…" /></label>
     <label className="flex min-h-12 items-center gap-3 text-sm"><input className="size-5 accent-emerald-700" type="checkbox" checked={pendingOnly} onChange={e => setPendingOnly(e.target.checked)} />Mostrar sólo pendientes</label>
     {!visible.length && <p className="panel">No hay tareas que coincidan con los filtros.</p>}

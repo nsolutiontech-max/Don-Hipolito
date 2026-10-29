@@ -143,6 +143,7 @@ lib/planillas-admin.ts         ABM de planillas sólo servidor
 lib/compras-admin.ts           proveedores, compras y productos para compras sólo servidor
 lib/users-admin.ts             ABM de usuarios sólo servidor
 lib/constants.ts               unidades compartidas
+components/ProgressBar.tsx     barra de progreso con índice porcentual legible
 scripts/generar-seed3.py       extracción reproducible del XLSX
 scripts/generar-seed-auditoria.py extracción reproducible de los 84 criterios
 scripts/generar-seed-entrevista.py extracción reproducible de la evaluación práctica

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cerrarAuditoria, guardarAuditoria } from "@/app/auditorias/actions";
+import { ProgressBar } from "@/components/ProgressBar";
 import { displayDate } from "@/lib/dates";
 import type { Audit, AuditBlock, AuditResult, Criterion, Part, Response } from "@/lib/audits";
 
@@ -97,7 +98,7 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
         <span className="text-red-800">{failed} NO OK</span>
         <span>{closed ? `Puntaje ${ok}/${criteria.length}` : "Puntaje al cerrar"}</span>
       </div>
-      <progress className="mt-2 w-full accent-emerald-700" value={answered} max={criteria.length} aria-label="Progreso de auditoría" />
+      <ProgressBar value={answered} max={criteria.length} label="Progreso de auditoría" />
     </header>
     {closed && <p className="panel border-emerald-300 bg-emerald-50" role="status">Auditoría cerrada e inmutable. Firmada por: {audit?.firma}.</p>}
     <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Bloques de auditoría">
