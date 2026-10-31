@@ -2,19 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { cerrarAuditoria, guardarAuditoria } from "@/app/auditorias/actions";
+import { cerrarAuditoria, guardarAuditoria, reabrirAuditoria } from "@/app/auditorias/actions";
 import { ProgressBar } from "@/components/ProgressBar";
 import { displayDate } from "@/lib/dates";
-import type { Audit, AuditBlock, AuditResult, Criterion, Part, Response } from "@/lib/audits";
+import type { Audit, AuditBlock, AuditResult, Criterion, Entrega, Part, Response } from "@/lib/audits";
 
 type Row = { resultado: AuditResult | null; observaciones: string; mejora: string; necesidad: string };
 type Props = {
   date: string; auditorName: string;
   audit: Audit | null; parts: Part[]; responses: Response[]; criteria: Criterion[];
+  entregas: Entrega[];
 };
 const blank = (): Row => ({ resultado: null, observaciones: "", mejora: "", necesidad: "" });
 
-export function AuditClient({ date, auditorName, audit, parts, responses, criteria }: Props) {
+export function AuditClient({ date, auditorName, audit, parts, responses, criteria, entregas }: Props) {
   const router = useRouter();
   const [rows, setRows] = useState<Record<string, Row>>(() => Object.fromEntries(criteria.map(item => {
     const response = responses.find(value => value.item_id === item.id);
@@ -32,7 +33,10 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState("");
   const [confirmClose, setConfirmClose] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [confirmReopen, setConfirmReopen] = useState(false);
   const closed = audit?.estado === "CERRADO";
+  const reopened = audit?.estado === "ABIERTO";
   const answered = criteria.filter(item => rows[item.id]?.resultado).length;
   const ok = criteria.filter(item => rows[item.id]?.resultado === "OK").length;
   const failed = answered - ok;
@@ -78,13 +82,28 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
     } catch { setMessage("No se pudo cerrar la auditoría."); }
     finally { setSaving(false); }
   };
+  const reopen = async () => {
+    if (!audit) return;
+    if (motivo.trim().length < 5 || motivo.trim().length > 500) {
+      setMessage("El motivo necesita entre 5 y 500 caracteres.");
+      return;
+    }
+    setSaving(true); setMessage("");
+    try {
+      const result = await reabrirAuditoria({ id: audit.id, motivo: motivo });
+      if (!result.ok) { setMessage(result.error ?? "No se pudo reabrir."); return; }
+      setConfirmReopen(false); setMotivo(""); setMessage("Auditoría reabierta. Corrige los datos y vuelve a cerrar.");
+      router.refresh();
+    } catch { setMessage("No se pudo reabrir la auditoría."); }
+    finally { setSaving(false); }
+  };
 
   return <div className="space-y-4 pb-28">
     <header className="panel">
       <p className="eyebrow">Control operativo · {displayDate(date)}</p>
       <div className="flex flex-wrap items-start justify-between gap-2"><h1>Auditoría diaria</h1>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${closed ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{closed ? "Cerrada" : "Borrador"}</span></div>
-      <p className="mt-2 text-sm text-zinc-600">Auditor: {auditorName}{closed && audit?.cerrado_en ? ` · Cerrada ${new Date(audit.cerrado_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}` : ""}</p>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${closed ? "bg-emerald-100 text-emerald-900" : reopened ? "bg-orange-100 text-orange-900" : "bg-amber-100 text-amber-900"}`}>{closed ? "Cerrada" : reopened ? "Reabierta" : "Borrador"}</span></div>
+      <p className="mt-2 text-sm text-zinc-600">Auditor: {auditorName}{closed && audit?.cerrado_en ? ` · Cerrada ${new Date(audit.cerrado_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}` : ""}{reopened && audit?.abierto_en ? ` · Reabierta ${new Date(audit.abierto_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}` : ""}</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label><span className="mb-1 block text-sm font-medium">Fecha bloque Cocina</span>
           <input className="field" type="date" value={fechaCocina} disabled={closed}
@@ -100,7 +119,51 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
       </div>
       <ProgressBar value={answered} max={criteria.length} label="Progreso de auditoría" />
     </header>
-    {closed && <p className="panel border-emerald-300 bg-emerald-50" role="status">Auditoría cerrada e inmutable. Firmada por: {audit?.firma}.</p>}
+    {closed && (
+      <section className="panel" role="status">
+        <p className="text-sm text-zinc-700">Auditoría cerrada e inmutable. Firmada por: {audit?.firma}.</p>
+        {!confirmReopen ? (
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button type="button" className="button-secondary" disabled={saving}
+              onClick={() => { setConfirmReopen(true); setMotivo(""); setMessage(""); }}>
+              Reabrir para corregir
+            </button>
+            {message && <p className={`text-sm ${message.startsWith("No se") || message.includes("motivo") ? "text-red-700" : "text-zinc-700"}`}>{message}</p>}
+          </div>
+        ) : (
+          <div className="mt-3 space-y-2">
+            <label className="block"><span className="mb-1 block text-sm font-medium">Motivo de la reapertura</span>
+              <textarea className="field min-h-20" maxLength={500} value={motivo}
+                placeholder="¿Qué estaba mal? ¿Quién pide la corrección?"
+                onChange={event => { setMotivo(event.target.value); setMessage(""); }} /></label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="button-secondary" disabled={saving}
+                onClick={() => { setConfirmReopen(false); setMessage(""); }}>Cancelar</button>
+              <button type="button" className="flex min-h-12 items-center justify-center rounded-lg bg-red-800 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                disabled={saving || motivo.trim().length < 5} onClick={reopen}>
+                {saving ? "Abriendo…" : "Confirmar reapertura"}
+              </button>
+            </div>
+            {message && <p className="text-sm text-red-700">{message}</p>}
+          </div>
+        )}
+      </section>
+    )}
+    {reopened && <p className="panel border-orange-300 bg-orange-50" role="status">Auditoría reabierta{audit?.motivo_apertura ? `: ${audit.motivo_apertura}` : ""}. Corrige los datos y vuelve a cerrar con firma; la entrega anterior queda registrada en el historial.</p>}
+    {entregas.length > 0 && (
+      <section className="panel">
+        <h2>Entregas cerradas</h2>
+        <ul className="mt-2 space-y-3 text-sm">
+          {entregas.map(entrega => (
+            <li key={entrega.id} className="border-t border-zinc-100 pt-3 first:border-0 first:pt-0">
+              <p className="font-semibold tabular-nums">Cerrada {new Date(entrega.cerrado_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} · {entrega.ok}/84 OK{entrega.no_ok ? ` · ${entrega.no_ok} NO OK` : ""}</p>
+              <p className="text-xs text-zinc-600">Firma: {entrega.firma || "—"}</p>
+              {entrega.abierto_en && <p className="text-xs text-red-800">Reabierta {new Date(entrega.abierto_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })} · Motivo: {entrega.motivo_apertura}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
     <div className="grid grid-cols-2 gap-2" role="tablist" aria-label="Bloques de auditoría">
       {(["COCINA", "SALON_GENERAL"] as const).map(value => {
         const total = criteria.filter(item => item.bloque === value);

@@ -13,8 +13,13 @@ export type Response = {
 };
 export type Part = { bloque: AuditBlock; fecha: string; auditor_id: string; usuarios: { email: string } | null };
 export type Audit = {
-  id: string; plantilla_id: string; fecha: string; estado: "BORRADOR" | "CERRADO";
+  id: string; plantilla_id: string; fecha: string; estado: "BORRADOR" | "ABIERTO" | "CERRADO";
   observaciones_generales: string; firma: string; actualizado_en: string; cerrado_en: string | null;
+  abierto_por: string | null; abierto_en: string | null; motivo_apertura: string;
+};
+export type Entrega = {
+  id: string; firma: string; ok: number; no_ok: number; pendientes: number;
+  cerrado_en: string; abierto_en: string | null; motivo_apertura: string;
 };
 export type AuditSummary = Audit & { auditoria_respuestas: { resultado: AuditResult | null }[] };
 
@@ -33,14 +38,18 @@ export async function getAudit(date: string) {
   const auditResult = await db.from("auditorias").select("*").eq("fecha", date).maybeSingle();
   if (auditResult.error) throw new Error("No se pudo cargar la auditoría.");
   const audit = auditResult.data as Audit | null;
-  if (!audit) return { audit: null, parts: [] as Part[], responses: [] as Response[] };
-  const [parts, responses] = await Promise.all([
+  if (!audit) return { audit: null, parts: [] as Part[], responses: [] as Response[], entregas: [] as Entrega[] };
+  const [parts, responses, entregas] = await Promise.all([
     db.from("auditoria_partes").select("bloque,fecha,auditor_id,usuarios(email)").eq("auditoria_id", audit.id),
     db.from("auditoria_respuestas")
       .select("item_id,resultado,observaciones,mejora,necesidad").eq("auditoria_id", audit.id),
+    db.from("auditoria_entregas")
+      .select("id,firma,ok,no_ok,pendientes,cerrado_en,abierto_en,motivo_apertura")
+      .eq("auditoria_id", audit.id).order("cerrado_en", { ascending: true }),
   ]);
-  if (parts.error || responses.error) throw new Error("No se pudo cargar el detalle de la auditoría.");
-  return { audit, parts: parts.data as unknown as Part[], responses: responses.data as Response[] };
+  if (parts.error || responses.error || entregas.error) throw new Error("No se pudo cargar el detalle de la auditoría.");
+  return { audit, parts: parts.data as unknown as Part[], responses: responses.data as Response[],
+    entregas: entregas.data as Entrega[] };
 }
 
 export async function listAudits(limit = 20): Promise<AuditSummary[]> {

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { fechaHoy, getSheets, pageSession } from "@/lib/data";
 import { displayDate, inicioSemana, sumarDias } from "@/lib/dates";
-import { sheetSlug } from "@/lib/permissions";
+import { sheetSlug, canOperate } from "@/lib/permissions";
 import { supabaseServer } from "@/lib/supabase/server";
 import { ProgressBar } from "@/components/ProgressBar";
 
@@ -80,8 +80,8 @@ export default async function TodayPage() {
       })}
       {!taskAreas.length && <p className="mt-2 text-sm text-zinc-600">No hay actividades programadas para hoy.</p>}
     </section>
-    {session.rol === "DUEÑO" && <Link href={`/auditorias/${date}`} className="panel block hover:border-emerald-600"><p className="eyebrow">Control del dueño</p>
+    {canOperate(session.rol) && <Link href={`/auditorias/${date}`} className="panel block hover:border-emerald-600"><p className="eyebrow">Control operativo</p>
       <h2>Auditoría diaria</h2><p className="mt-2 text-sm tabular-nums">{auditAnswered} / 84 respondidos
-        {auditToday.data?.estado === "CERRADO" ? ` · Cerrada con ${auditOk}/84 OK` : " · Borrador"} →</p></Link>}
+        {auditToday.data?.estado === "CERRADO" ? ` · Cerrada con ${auditOk}/84 OK` : auditToday.data?.estado === "ABIERTO" ? " · Reabierta: corregir y volver a cerrar" : " · Borrador"} →</p></Link>}
   </div>;
 }

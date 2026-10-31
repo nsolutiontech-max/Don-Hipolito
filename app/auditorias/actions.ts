@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { exigirDueno } from "@/lib/data";
+import { exigirDuenoOEncargado } from "@/lib/data";
 import { supabaseServer } from "@/lib/supabase/server";
 
 const text = (max: number) => z.string().max(max);
@@ -22,6 +22,7 @@ const payload = z.object({
   respuestas: z.array(response).max(84),
 });
 const closePayload = z.object({ id: z.uuid(), firma: z.string().trim().min(1).max(500) });
+const reopenPayload = z.object({ id: z.uuid(), motivo: z.string().trim().min(5).max(500) });
 
 function safeMessage(fallback: string) {
   return fallback;
@@ -29,7 +30,7 @@ function safeMessage(fallback: string) {
 
 export async function guardarAuditoria(input: z.input<typeof payload>) {
   try {
-    await exigirDueno();
+    await exigirDuenoOEncargado();
     const parsed = payload.safeParse(input);
     if (!parsed.success) return { ok: false, error: safeMessage("Revisa las fechas y los datos ingresados.") };
     const data = parsed.data;
@@ -54,7 +55,7 @@ export async function guardarAuditoria(input: z.input<typeof payload>) {
 
 export async function cerrarAuditoria(input: z.input<typeof closePayload>) {
   try {
-    await exigirDueno();
+    await exigirDuenoOEncargado();
     const parsed = closePayload.safeParse(input);
     if (!parsed.success) return { ok: false, error: "La firma o aclaración es obligatoria para cerrar." };
     const db = await supabaseServer();
@@ -67,5 +68,23 @@ export async function cerrarAuditoria(input: z.input<typeof closePayload>) {
     return { ok: true };
   } catch {
     return { ok: false, error: safeMessage("No se pudo cerrar la auditoría.") };
+  }
+}
+
+export async function reabrirAuditoria(input: z.input<typeof reopenPayload>) {
+  try {
+    await exigirDuenoOEncargado();
+    const parsed = reopenPayload.safeParse(input);
+    if (!parsed.success) return { ok: false, error: safeMessage("El motivo necesita entre 5 y 500 caracteres.") };
+    const db = await supabaseServer();
+    const { error } = await db.rpc("reabrir_auditoria", {
+      p_id: parsed.data.id, p_motivo: parsed.data.motivo,
+    });
+    if (error) return { ok: false, error: safeMessage("No se pudo reabrir. Comprueba el estado de la auditoría y tus permisos.") };
+    revalidatePath("/auditorias");
+    revalidatePath("/hoy");
+    return { ok: true };
+  } catch {
+    return { ok: false, error: safeMessage("No se pudo reabrir la auditoría.") };
   }
 }
