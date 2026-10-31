@@ -38,3 +38,7 @@ export type InventoryRecord = {
   estado?: "ABIERTO" | "CERRADO";
   cerrado_por?: string | null; cerrado_en?: string | null; motivo_apertura?: string;
 };
+export type InventoryHistoryEntry = {
+  id: string; fecha: string; estado: "ABIERTO" | "CERRADO";
+  actualizado_en: string; completos: number;
+};

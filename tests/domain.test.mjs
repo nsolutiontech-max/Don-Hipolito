@@ -15,6 +15,7 @@ const dates = await moduleFrom('lib/dates.ts');
 const calculations = await moduleFrom('lib/calculations.ts');
 const quantities = await moduleFrom('lib/quantity-parse.ts');
 const whatsapp = await moduleFrom('lib/whatsapp.ts');
+const inventoryHistory = await moduleFrom('lib/inventory-history.ts');
 
 test('CAMARERO is scoped to beverages; operators retain all stock sheets', () => {
   for (const code of ['STOCK_A', 'STOCK_B', 'STOCK_C', 'BEBIDAS']) {
@@ -42,6 +43,23 @@ test('suggested quantity never invents an ideal or an uncounted stock', () => {
   assert.equal(calculations.cantidadSugerida(5, null), 0);
   assert.equal(calculations.cantidadSugerida(5, 2.5), 2.5);
   assert.equal(calculations.cantidadSugerida(2, 5), 0);
+});
+test('history counts only products complete in every required location', () => {
+  const details = [
+    { producto_id: 'a', stock_real: 0 }, { producto_id: 'b', stock_real: 3 },
+    { producto_id: 'b', stock_real: null }, { producto_id: 'c', stock_real: 1 },
+    { producto_id: 'c', stock_real: 2 },
+  ];
+  assert.equal(inventoryHistory.contarArticulosCompletos(details, 1), 3);
+  assert.equal(inventoryHistory.contarArticulosCompletos(details, 2), 1);
+  assert.equal(inventoryHistory.contarArticulosCompletos([], 1), 0);
+  assert.equal(inventoryHistory.contarArticulosCompletos(details, 0), 0);
+});
+test('history status prioritizes closing over completeness', () => {
+  assert.equal(inventoryHistory.estadoInventario('CERRADO', 0, 10), 'CERRADO');
+  assert.equal(inventoryHistory.estadoInventario('ABIERTO', 10, 10), 'COMPLETO');
+  assert.equal(inventoryHistory.estadoInventario('ABIERTO', 9, 10), 'PARCIAL');
+  assert.equal(inventoryHistory.estadoInventario('ABIERTO', 0, 0), 'PARCIAL');
 });
 test('WhatsApp contains the date, presentation and no shift', () => {
   const message = whatsapp.armarMensajePedido([{ producto: { nombre: 'Coca-Cola', presentacion: '350 cc', unidad_medida: 'UN' },

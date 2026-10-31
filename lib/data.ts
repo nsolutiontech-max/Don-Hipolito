@@ -3,9 +3,10 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { canOperate } from "@/lib/permissions";
-import type { Catalogo, InventoryCatalog, InventoryRecord, InventorySheet, Movimiento, SesionUsuario, SheetCode } from "@/lib/types";
+import type { Catalogo, InventoryCatalog, InventoryHistoryEntry, InventoryRecord, InventorySheet, Movimiento, SesionUsuario, SheetCode } from "@/lib/types";
+import { contarArticulosCompletos } from "@/lib/inventory-history";
 export type * from "@/lib/types";
-export { fechaHoy } from "@/lib/dates";
+export { displayDate, fechaHoy, inicioSemana, sumarDias } from "@/lib/dates";
 
 export const getSesionUsuario = cache(async (): Promise<SesionUsuario | null> => {
   const db = await supabaseServer();
@@ -34,6 +35,12 @@ export async function exigirOperador() {
 export async function exigirDueno() {
   const session = await exigirSesion();
   if (session.rol !== "DUEÑO") throw new Error("Acceso exclusivo del dueño.");
+  return session;
+}
+
+export async function exigirDuenoOEncargado() {
+  const session = await exigirSesion();
+  if (!canOperate(session.rol)) throw new Error("Acceso exclusivo del dueño o encargado.");
   return session;
 }
 
@@ -78,6 +85,18 @@ export async function getInventory(sheetId: string, date: string) {
   return { inventory, details: details.data };
 }
 
+export async function getInventoryHistory(sheetId: string, ubicacionesRequeridas: number, limit = 90): Promise<InventoryHistoryEntry[]> {
+  const db = await supabaseServer();
+  const { data, error } = await db.from("inventarios")
+    .select("id,fecha,estado,actualizado_en,inventario_detalles(producto_id,stock_real)")
+    .eq("planilla_id", sheetId).order("fecha", { ascending: false }).limit(limit);
+  if (error) throw new Error("No se pudo cargar el historial de inventarios.");
+  return data.map(row => ({
+    id: row.id, fecha: row.fecha, estado: row.estado, actualizado_en: row.actualizado_en,
+    completos: contarArticulosCompletos(row.inventario_detalles ?? [], ubicacionesRequeridas),
+  }));
+}
+
 export async function getCatalogo(): Promise<Catalogo> {
   const db = await supabaseServer();
   const [cats, products, responsible] = await Promise.all([
@@ -93,6 +112,37 @@ export async function getMovimientosRecientes(limit = 20): Promise<Movimiento[]>
   const db = await supabaseServer();
   const { data, error } = await db.from("movimientos").select("*").order("fecha", { ascending: false }).limit(limit);
   if (error) throw new Error("No se pudieron cargar los movimientos.");
+  return data;
+}
+
+export type FiltrosMovimientos = {
+  fechaDesde?: string;
+  fechaHasta?: string;
+  producto_id?: string;
+  tipo?: "INGRESO" | "EGRESO" | "TODOS";
+  limit?: number;
+  offset?: number;
+};
+
+export async function getMovimientosFiltrados(filtros: FiltrosMovimientos = {}): Promise<Movimiento[]> {
+  const db = await supabaseServer();
+  const {
+    fechaDesde,
+    fechaHasta,
+    producto_id,
+    tipo = "TODOS",
+    limit = 20,
+    offset = 0,
+  } = filtros;
+
+  let query = db.from("movimientos").select("*");
+  if (fechaDesde) query = query.gte("fecha", `${fechaDesde}T00:00:00-03:00`);
+  if (fechaHasta) query = query.lte("fecha", `${fechaHasta}T23:59:59-03:00`);
+  if (producto_id) query = query.eq("producto_id", producto_id);
+  if (tipo !== "TODOS") query = query.eq("tipo", tipo);
+
+  const { data, error } = await query.order("fecha", { ascending: false }).range(offset, offset + limit - 1);
+  if (error) throw new Error("No se pudieron cargar los movimientos filtrados.");
   return data;
 }
 
