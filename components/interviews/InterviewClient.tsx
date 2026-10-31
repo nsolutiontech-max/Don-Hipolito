@@ -3,13 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { guardarEntrevista } from "@/app/entrevistas/actions";
+import { finalizarEntrevista, guardarEntrevista, reabrirEntrevista } from "@/app/entrevistas/actions";
 import { ProgressBar } from "@/components/ProgressBar";
 import { displayDate } from "@/lib/dates";
 import type { Interview, InterviewBundle, InterviewSectionResponse } from "@/lib/interviews";
 
 type CriterionRow = { valor: boolean | null; observacion: string };
 type SectionRow = { resultado: InterviewSectionResponse["resultado"]; observaciones: string };
+const DECISION_LABELS = { SI: "Sí", SI_CAPACITACION: "Sí, con capacitación", DUDAS: "Dudas", NO: "No" } as const;
 
 export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle; evaluatorName: string }) {
   const router = useRouter();
@@ -30,7 +31,13 @@ export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle
     data.criterionResponses.map(item => [item.criterio_id, { valor: item.valor, observacion: item.observacion }])));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [motivo, setMotivo] = useState("");
+  const [confirmFinalize, setConfirmFinalize] = useState(false);
+  const [reopening, setReopening] = useState(false);
+  const finalized = interview.estado === "FINALIZADA";
+  const decisionPicked = decision !== null && decision !== undefined;
   const answered = data.criteria.filter(item => criterionRows[item.id]?.valor !== undefined && criterionRows[item.id]?.valor !== null).length;
+  const errorStyle = (text: string) => /^(No se|Elegí|El motivo)/.test(text) ? "text-red-700" : "text-zinc-700";
 
   const save = async () => {
     setSaving(true); setMessage("");
@@ -49,6 +56,33 @@ export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle
     finally { setSaving(false); }
   };
 
+  const finalize = async () => {
+    if (!decisionPicked) { setMessage("Elegí una decisión antes de finalizar."); return; }
+    setSaving(true); setMessage("");
+    try {
+      const result = await finalizarEntrevista({ id: interview.id });
+      if (!result.ok) { setMessage(result.error ?? "No se pudo finalizar."); return; }
+      setConfirmFinalize(false); setMessage("Evaluación finalizada. Queda congelada en el historial.");
+      router.refresh();
+    } catch { setMessage("No se pudo finalizar la entrevista."); }
+    finally { setSaving(false); }
+  };
+
+  const reopen = async () => {
+    if (motivo.trim().length < 5 || motivo.trim().length > 500) {
+      setMessage("El motivo necesita entre 5 y 500 caracteres.");
+      return;
+    }
+    setSaving(true); setMessage("");
+    try {
+      const result = await reabrirEntrevista({ id: interview.id, motivo: motivo });
+      if (!result.ok) { setMessage(result.error ?? "No se pudo reabrir."); return; }
+      setReopening(false); setMotivo(""); setMessage("Entrevista reabierta. Los datos vuelven a ser editables.");
+      router.refresh();
+    } catch { setMessage("No se pudo reabrir la entrevista."); }
+    finally { setSaving(false); }
+  };
+
   const ratingField = (label: string, value: number | null, onChange: (value: number | null) => void) => (
     <label><span className="mb-1 block text-sm font-medium">{label}</span>
       <select className="field" value={value ?? ""} onChange={event => onChange(event.target.value ? Number(event.target.value) : null)}>
@@ -63,10 +97,38 @@ export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle
     <header className="panel">
       <p className="eyebrow">Recursos humanos · {displayDate(date)}</p>
       <div className="flex flex-wrap items-start justify-between gap-2"><h1>Entrevista práctica</h1>
-        <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-700">{interview.estado}</span></div>
-      <p className="mt-2 text-sm text-zinc-600">Evaluador: {evaluatorName} · {answered}/{data.criteria.length} criterios respondidos</p>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${finalized ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{finalized ? "Finalizada" : "Borrador"}</span></div>
+      <p className="mt-2 text-sm text-zinc-600">Evaluador: {evaluatorName} · {answered}/{data.criteria.length} criterios respondidos
+        {finalized && interview.finalizada_en ? ` · Finalizada ${new Date(interview.finalizada_en).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}` : ""}</p>
       <ProgressBar value={answered} max={data.criteria.length} label="Progreso de evaluación" />
     </header>
+    {finalized && (
+      <section className="panel" role="status">
+        <p className="text-sm text-zinc-700">Evaluación finalizada y congelada. Para corregir algo, reabrí con motivo.{interview.motivo_reapertura ? ` Última reapertura: ${interview.motivo_reapertura}` : ""}</p>
+        {!reopening ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" className="button-secondary" disabled={saving}
+              onClick={() => { setReopening(true); setMotivo(""); setMessage(""); }}>Reabrir con motivo</button>
+            {message && <p className={`text-sm ${errorStyle(message)}`}>{message}</p>}
+          </div>
+        ) : (
+          <div className="mt-3 space-y-2">
+            <label className="block"><span className="mb-1 block text-sm font-medium">Motivo de la reapertura</span>
+              <textarea className="field min-h-20" maxLength={500} value={motivo}
+                placeholder="¿Qué falta o qué estaba mal?"
+                onChange={event => { setMotivo(event.target.value); setMessage(""); }} /></label>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="button-secondary" disabled={saving}
+                onClick={() => { setReopening(false); setMessage(""); }}>Cancelar</button>
+              <button type="button" className="flex min-h-12 items-center justify-center rounded-lg bg-red-800 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                disabled={saving || motivo.trim().length < 5} onClick={reopen}>Confirmar reapertura</button>
+            </div>
+            {message && <p className={`text-sm ${errorStyle(message)}`}>{message}</p>}
+          </div>
+        )}
+      </section>
+    )}
+    <fieldset disabled={saving || finalized} className={`space-y-4 ${finalized ? "opacity-80" : ""}`}>
     <section className="panel grid gap-3 sm:grid-cols-2">
       <label><span className="mb-1 block text-sm font-medium">Candidato</span>
         <input className="field" maxLength={200} value={candidate} onChange={event => setCandidate(event.target.value)} /></label>
@@ -142,9 +204,22 @@ export function InterviewClient({ data, evaluatorName }: { data: InterviewBundle
           <textarea className="field min-h-28" maxLength={5000} value={observations} onChange={event => setObservations(event.target.value)} /></label>
       </div>
     </section>
+    </fieldset>
     <div className="action-bar">
-      <p role="status" className="mb-2 text-sm">{message || `${answered}/${data.criteria.length} criterios respondidos`}</p>
-      <button type="button" className="button-primary w-full" disabled={saving} onClick={save}>{saving ? "Guardando…" : "Guardar evaluación"}</button>
+      <p role="status" className={`mb-2 text-sm ${errorStyle(message)}`}>{message || `${answered}/${data.criteria.length} criterios respondidos`}</p>
+      {!finalized && (!confirmFinalize ? (
+        <div className="flex gap-2">
+          <button type="button" className="button-primary flex-1" disabled={saving} onClick={save}>{saving ? "Guardando…" : "Guardar evaluación"}</button>
+          <button type="button" className="button-secondary flex-1" disabled={saving || !decisionPicked}
+            onClick={() => { setConfirmFinalize(true); setMessage("Al finalizar la evaluación queda congelada. Revisa la decisión antes de confirmar."); }}>Finalizar evaluación</button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <button type="button" className="button-secondary flex-1" disabled={saving} onClick={() => setConfirmFinalize(false)}>Cancelar</button>
+          <button type="button" className="flex min-h-12 flex-1 items-center justify-center rounded-lg bg-emerald-800 px-4 text-sm font-semibold text-white disabled:opacity-50"
+            disabled={saving || !decisionPicked} onClick={finalize}>{saving ? "Finalizando…" : `Confirmar finalización (${DECISION_LABELS[decision!] ?? ""})`}</button>
+        </div>
+      ))}
     </div>
   </div>;
 }

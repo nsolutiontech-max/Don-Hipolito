@@ -41,8 +41,16 @@ try {
   if (!auditMigration.rows[0].present) await db.query(readFileSync('supabase/migrations/005_autoria_operativa.sql', 'utf8'));
   const auditTable = await db.query("select to_regclass('public.auditorias') as present");
   if (!auditTable.rows[0].present) {
-    for (const path of ['supabase/migrations/006_auditorias.sql', 'supabase/seed5_auditoria.sql']) {
+    for (const path of ['supabase/migrations/006_auditorias.sql', 'supabase/seed5_auditoria.sql',
+      'supabase/migrations/013_auditorias_encargado.sql', 'supabase/migrations/014_reapertura_auditorias.sql']) {
       await db.query(readFileSync(path, 'utf8'));
+    }
+  } else {
+    // Existing audits but missing 013/014 (mid-upgrade): both files re-run safely.
+    const reopenRpc = await db.query("select exists(select 1 from pg_proc where proname='reabrir_auditoria') as present");
+    if (!reopenRpc.rows[0].present) {
+      await db.query(readFileSync('supabase/migrations/013_auditorias_encargado.sql', 'utf8'));
+      await db.query(readFileSync('supabase/migrations/014_reapertura_auditorias.sql', 'utf8'));
     }
   }
   const interviewTable = await db.query("select to_regclass('public.entrevistas') as present");
@@ -51,6 +59,8 @@ try {
       await db.query(readFileSync(path, 'utf8'));
     }
   }
+  const finalizeRpc = await db.query("select exists(select 1 from pg_proc where proname='finalizar_entrevista') as present");
+  if (!finalizeRpc.rows[0].present) await db.query(readFileSync('supabase/migrations/015_entrevistas_finalizar.sql', 'utf8'));
   const objetivoTrigger = await db.query("select exists(select 1 from pg_trigger where tgname='confirmar_objetivo_producto') as present");
   if (!objetivoTrigger.rows[0].present) await db.query(readFileSync('supabase/migrations/008_confirmar_objetivo_producto.sql', 'utf8'));
   const cierreColumn = await db.query("select 1 from information_schema.columns where table_name='inventarios' and column_name='estado'");
@@ -173,7 +183,7 @@ try {
   await actingAs(ids.ENCARGADO);
   const encargadoFrecuencia = await db.query("update public.actividad_programaciones set frecuencia='SEMANAL' where id=$1", [weeklyTask]);
   check(encargadoFrecuencia.rowCount === 0, 'ENCARGADO cannot change task frequencies');
-  check((await db.query('select * from public.auditoria_items')).rowCount === 0, 'ENCARGADO cannot read audit criteria');
+  check((await db.query('select * from public.auditoria_items')).rowCount === 84, 'ENCARGADO reads audit criteria to fill audits');
   check((await db.query('select * from public.entrevista_criterios')).rowCount === 0, 'ENCARGADO cannot read interview criteria');
   const encargadoCatalogo = await db.query("update public.productos set activo = true where id=$1", [targetProduct]);
   check(encargadoCatalogo.rowCount === 0, 'ENCARGADO cannot edit the catalogue');
@@ -217,6 +227,31 @@ try {
   await fails('select public.guardar_auditoria($1::date,$1::date,$1::date,$2,$3,$4::jsonb)',
     [auditDate, 'Cambio posterior', '', JSON.stringify(complete)], /Closed audits are immutable/i,
     'Closed audits reject further edits');
+  // Reopening: reason is mandatory, transitions are audited (migration 014).
+  await fails("update public.auditorias set estado='ABIERTO', observaciones_generales='Cambio colado' where id=$1",
+    [auditId], /Reopen only unlocks/i, 'A reopen transition rejects smuggled content edits');
+  await actingAs(ids.ENCARGADO);
+  await fails('select public.guardar_auditoria($1::date,$1::date,$1::date,$2,$3,$4::jsonb)',
+    [auditDate, 'Edición directa', '', JSON.stringify(complete)], /Closed audits are immutable/i,
+    'ENCARGADO cannot edit a closed audit directly');
+  await fails('select public.reabrir_auditoria($1,$2)', [auditId, 'as'],
+    /5-500/i, 'Short reopen reason is rejected');
+  await db.query('select public.reabrir_auditoria($1,$2)', [auditId, 'Cargue mal un criterio y lo corrijo antes de reentregar']);
+  const reopened = (await db.query('select estado,motivo_apertura,abierto_por,abierto_en,firma from public.auditorias where id=$1', [auditId])).rows[0];
+  check(reopened.estado === 'ABIERTO' && reopened.abierto_por === ids.ENCARGADO && reopened.abierto_en !== null
+    && reopened.firma === 'Guille Pérez',
+    'ENCARGADO reopens the audit with reason, identity and intact signature');
+  const entregasReopen = (await db.query('select abierto_por,motivo_apertura from public.auditoria_entregas where auditoria_id=$1', [auditId])).rows;
+  check(entregasReopen.length === 1 && entregasReopen[0].abierto_por === ids.ENCARGADO
+    && /mal un criterio/.test(entregasReopen[0].motivo_apertura),
+    'The delivery record logs who reopened and the reason');
+  const corrected = complete.map(response => ({ ...response, resultado: 'OK' }));
+  await saveAudit(corrected);
+  await db.query('select public.cerrar_auditoria($1,$2)', [auditId, 'ENCARGADO con corrección']);
+  const entregasAfter = (await db.query('select firma,ok,no_ok from public.auditoria_entregas where auditoria_id=$1 order by cerrado_en', [auditId])).rows;
+  check(entregasAfter.length === 2 && entregasAfter[0].ok === 83 && entregasAfter[1].ok === 84 && entregasAfter[1].no_ok === 0,
+    'Second delivery snapshots the corrected score');
+  await actingAs(ids.DUEÑO);
   const interviewTemplate = (await db.query('select id from public.entrevista_plantillas where activa')).rows[0].id;
   const interviewSection = (await db.query('select id from public.entrevista_secciones order by orden limit 1')).rows[0].id;
   const interviewCriteria = (await db.query('select id from public.entrevista_criterios order by orden limit 2')).rows;
@@ -237,6 +272,31 @@ try {
   check((await db.query('select * from public.entrevista_seccion_respuestas where entrevista_id=$1', [interview])).rowCount === 1
     && (await db.query('select * from public.entrevista_criterio_respuestas where entrevista_id=$1', [interview])).rowCount === 2,
   'Interview section and criterion responses persist independently');
+  // Finalize interviews (migration 015): FINALIZADA freezes the record; reopen needs a reason.
+  const undecideInterview = (await db.query(
+    "insert into public.entrevistas(plantilla_id,fecha,candidato) values ($1,'2099-03-02','Candidato sin decision') returning id",
+    [interviewTemplate])).rows[0].id;
+  await fails('select public.finalizar_entrevista($1)', [undecideInterview],
+    /decision is required/i, 'Finalize demands a recorded decision first');
+  await db.query('select public.finalizar_entrevista($1)', [interview]);
+  const finalized = (await db.query('select estado,finalizada_en,motivo_reapertura,observaciones_finales from public.entrevistas where id=$1', [interview])).rows[0];
+  check(finalized.estado === 'FINALIZADA' && finalized.finalizada_en !== null && finalized.motivo_reapertura === '',
+    'Interview finalizes with decision and timestamp');
+  await fails("update public.entrevistas set observaciones_finales='Cambio colado' where id=$1",
+    [interview], /immutable/i, 'Finalized interview rejects content edits');
+  await fails("update public.entrevista_seccion_respuestas set observaciones='editada despues' where entrevista_id=$1",
+    [interview], /immutable/i, 'Finalized interview rejects response-table edits');
+  await fails('select public.finalizar_entrevista($1)', [interview],
+    /not found or already/i, 'Repeat finalize is rejected');
+  await fails("update public.entrevistas set estado='BORRADOR', motivo_reapertura='es' where id=$1",
+    [interview], /5-500/i, 'Short reopen reason is rejected');
+  await db.query("update public.entrevistas set estado='BORRADOR', motivo_reapertura='Faltaba cargar una seccion, sigo editando' where id=$1", [interview]);
+  const reopenedInterview = (await db.query('select estado,motivo_reapertura from public.entrevistas where id=$1', [interview])).rows[0];
+  check(reopenedInterview.estado === 'BORRADOR' && reopenedInterview.motivo_reapertura.includes('seccion'),
+    'Owner reopens a finalized interview with the logged reason');
+  await db.query("update public.entrevistas set observaciones_finales='Ajuste post reapertura' where id=$1", [interview]);
+  check((await db.query('select observaciones_finales from public.entrevistas where id=$1', [interview])).rows[0].observaciones_finales
+    === 'Ajuste post reapertura', 'Editing works again after reopening the interview');
   // Close and reopen daily inventories (migration 009).
   await actingAs(ids.ENCARGADO);
   const cierre = (await save(sheet.STOCK_A, [{ producto_id: stock, ubicacion: 'GENERAL', stock_real: 3 }])).rows[0].id;

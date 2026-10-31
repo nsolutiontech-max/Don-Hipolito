@@ -15,7 +15,7 @@ export type InterviewCriterionResponse = {
 };
 export type Interview = {
   id: string; plantilla_id: string; fecha: string; candidato: string; puesto_aspira: string;
-  estado: "BORRADOR" | "REGISTRADA";
+  estado: "BORRADOR" | "FINALIZADA"; finalizada_en: string | null; motivo_reapertura: string;
   tecnica_actual: number | null; velocidad: number | null; prolijidad: number | null;
   capacidad_aprendizaje: number | null; actitud: number | null;
   decision: "SI" | "SI_CAPACITACION" | "DUDAS" | "NO" | null;
@@ -25,7 +25,7 @@ export type InterviewBundle = {
   interview: Interview | null; sections: InterviewSection[]; criteria: InterviewCriterion[];
   sectionResponses: InterviewSectionResponse[]; criterionResponses: InterviewCriterionResponse[];
 };
-export type InterviewSummary = Pick<Interview, "id" | "fecha" | "candidato" | "estado" | "decision" | "actualizado_en">;
+export type InterviewSummary = Pick<Interview, "id" | "fecha" | "candidato" | "puesto_aspira" | "estado" | "decision" | "actualizado_en">;
 
 export async function getInterviewTemplate() {
   const db = await supabaseServer();
@@ -63,11 +63,14 @@ export async function getInterview(id: string): Promise<InterviewBundle> {
   };
 }
 
-export async function listInterviews(limit = 20): Promise<InterviewSummary[]> {
+export async function listInterviews(limit = 20, query?: string): Promise<InterviewSummary[]> {
   const db = await supabaseServer();
-  const { data, error } = await db.from("entrevistas")
-    .select("id,fecha,candidato,estado,decision,actualizado_en")
-    .order("creado_en", { ascending: false }).limit(limit);
+  const trimmed = query?.trim();
+  const base = db.from("entrevistas").select("id,fecha,candidato,puesto_aspira,estado,decision,actualizado_en");
+  const filtered = trimmed
+    ? base.or(`candidato.ilike.%${encodeURIComponent(trimmed)}%,puesto_aspira.ilike.%${encodeURIComponent(trimmed)}%`)
+    : base;
+  const { data, error } = await filtered.order("creado_en", { ascending: false }).limit(limit);
   if (error) throw new Error("No se pudo cargar el historial de entrevistas.");
   return data;
 }

@@ -18,6 +18,9 @@ export const files = [
   'supabase/migrations/010_planillas_admin_compras.sql',
   'supabase/migrations/011_restore_unique_unarchive.sql',
   'supabase/migrations/012_frecuencias_tareas.sql',
+  'supabase/migrations/013_auditorias_encargado.sql',
+  'supabase/migrations/014_reapertura_auditorias.sql',
+  'supabase/migrations/015_entrevistas_finalizar.sql',
 ];
 
 const db = await connectDatabase();

@@ -12,6 +12,8 @@ const createPayload = z.object({
   candidato: z.string().trim().min(1).max(200),
   puesto: z.string().trim().max(200),
 });
+const finalizePayload = z.object({ id: z.uuid() });
+const reopenPayload = z.object({ id: z.uuid(), motivo: z.string().trim().min(5).max(500) });
 const savePayload = z.object({
   id: z.uuid(), fecha: z.iso.date(), candidato: z.string().trim().min(1).max(200),
   puesto: z.string().trim().max(200),
@@ -89,5 +91,43 @@ export async function guardarEntrevista(input: z.input<typeof savePayload>): Pro
     return { ok: true };
   } catch {
     return { ok: false, error: "No se pudo guardar la entrevista." };
+  }
+}
+
+export async function finalizarEntrevista(input: z.input<typeof finalizePayload>): Promise<ActionResult> {
+  try {
+    await exigirDueno();
+    const parsed = finalizePayload.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "No se pudo finalizar la evaluación." };
+    const db = await supabaseServer();
+    const { error } = await db.rpc("finalizar_entrevista", { p_id: parsed.data.id });
+    if (error?.message.includes("decision")) {
+      return { ok: false, error: "Elegí una decisión antes de finalizar la entrevista." };
+    }
+    if (error) return { ok: false, error: "No se pudo finalizar. Comprueba el estado de la entrevista." };
+    revalidatePath("/entrevistas");
+    revalidatePath(`/entrevistas/${parsed.data.id}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "No se pudo finalizar la entrevista." };
+  }
+}
+
+export async function reabrirEntrevista(input: z.input<typeof reopenPayload>): Promise<ActionResult> {
+  try {
+    await exigirDueno();
+    const parsed = reopenPayload.safeParse(input);
+    if (!parsed.success) return { ok: false, error: "El motivo necesita entre 5 y 500 caracteres." };
+    const data = parsed.data;
+    const db = await supabaseServer();
+    const { error } = await db.from("entrevistas")
+      .update({ estado: "BORRADOR", motivo_reapertura: data.motivo })
+      .eq("id", data.id).eq("estado", "FINALIZADA");
+    if (error) return { ok: false, error: "No se pudo reabrir la entrevista." };
+    revalidatePath("/entrevistas");
+    revalidatePath(`/entrevistas/${data.id}`);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "No se pudo reabrir la entrevista." };
   }
 }
