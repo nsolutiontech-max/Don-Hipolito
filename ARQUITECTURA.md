@@ -14,8 +14,8 @@ Una planilla por fecha, sin turnos. Los inventarios y las tareas se pueden compl
 | Tareas Salón | Consulta de las 20 definiciones de apertura/cierre y su frecuencia original |
 | Pedidos | Persistidos, asociados al inventario, creación transaccional e idempotente; estados PENDIENTE/ENVIADO/RECIBIDO desde el historial; filtros por estado y fecha; exportación por WhatsApp |
 | Rol CAMARERO | Implementado en navegación, páginas, acciones y RLS; cuenta creada |
-| Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje y cierre firmado |
-| Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final |
+| Auditoría | Implementada: plantilla de 84 ítems (40 Cocina + 44 Salón/General), borrador parcial, puntaje, cierre firmado y reapertura con motivo registrada (dueño y encargados) |
+| Entrevista Práctica | Implementada: evaluación privada por candidato con 6 secciones, 40 criterios, resultados por sección y decisión final; se finaliza (nivel congelado y reabrible con motivo) y se busca en el historial |
 | Administración | Hub del dueño con Auditorías, Entrevistas, ABM de catálogo, planillas, proveedores, compras, frecuencias de tareas y usuarios |
 | Cierre de planillas / reapertura | Implementado: estado CERRADO, bloqueo de edición y reapertura auditada exclusiva del dueño (migración 009) |
 | Despliegue y aceptación en restaurante | Pendientes; las pruebas automatizadas no sustituyen un día real de operación |
@@ -81,10 +81,13 @@ El planificador calcula por fecha: las diarias se piden todos los días; las sem
 - `auditorias`: una por fecha; observaciones generales, firma y estado borrador/cerrado.
 - `auditoria_partes`: fecha por bloque y auditor derivado de sesión; no permite atribuir la auditoría a otra persona.
 - `auditoria_respuestas`: OK / NO OK / pendiente, observaciones, mejoras y necesidades por criterio.
+- `auditoria_entregas`: bitácora de cada cierre (firma, puntaje OK/NO OK/pendientes, autoría y momento) y de cada reapertura (quién, cuándo y por qué); la escribe un trigger propio y nadie la modifica a mano.
 
-El borrador se guarda en cualquier momento. La operación normal puede completar bloques por separado. Cierre requiere los 84 criterios respondidos y firma; después queda inmutable en el sistema, con puntaje `OK / 84` calculado. **No hay reabertura ni firma gráfica todavía.** Si el cierre fue erróneo, se revisa fuera del sistema y se documenta como corrección manual hasta implementar reabertura controlada.
+El borrador se guarda en cualquier momento. La operación normal puede completar bloques por separado. Cierre requiere los 84 criterios respondidos y firma; después queda inmutable en el sistema, con puntaje `OK / 84` calculado. **Aún no hay firma gráfica.** Si el cierre fue erróneo o un encargado cargó mal un dato, dueño y encargados pueden **reabrir** la auditoría con motivo obligatorio (5 a 500 caracteres): pasa a estado `ABIERTO`, vuelve a editarse y debe cerrarse de nuevo con firma. El receptor del cierre bloquea ediciones disfrazadas de reapertura (sólo desbloquea) y cada entrega cerrada queda en `auditoria_entregas` con su firma, puntaje y detalle de reapertura; la última entrega manda.
 
-La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nueva versión de plantilla, no editar la actual.
+La auditoría puede realizarla y cerrarla el dueño o un encargado, y también reabrirla con motivo; el autor queda derivado de la sesión. La edición de la plantilla sigue siendo exclusiva del dueño. Cambios futuros de criterios deben usar una nueva versión de plantilla, no editar la actual.
+
+La única función `SECURITY DEFINER` operativa además de los predicados de permisos es el trigger de bitácora `auditoria_entregas_bitacora`: no es invocable y garantiza que el log no pueda escribirse manualmente por REST.
 
 ### Entrevistas
 
@@ -93,6 +96,8 @@ La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nu
 - `entrevista_criterios`: Sí/No por criterio y observación opcional.
 - `entrevistas`: candidato, fecha, puesto aspirado, evaluador derivado de sesión, cinco valoraciones finales (1–5), decisión final, puesto sugerido y observaciones.
 - Los triggers validan que cada respuesta pertenezca a la plantilla de esa entrevista.
+
+La evaluación se guarda como borrador y se **finaliza** con la decisión anotada (estado `FINALIZADA` con momento; la revisión sin decisión se rechaza). Finalizada queda congelada a nivel de BD: filas y respuestas no se dejan editar; el dueño puede **reabrirla** con motivo obligatorio (5–500 caracteres), que queda registrado en `motivo_reapertura`. El historial permite buscar por candidato o puesto.
 
 **No hay registro formal de incorporación, capacitación ni estado de contratación todavía.** La evaluación queda como historial privado del dueño.
 
@@ -106,7 +111,7 @@ La plantilla pertenece al dueño. Cambios futuros de criterios deben usar una nu
 | Tareas Salón y referencia de frecuencias | Sí | Sí | Sí |
 | Edición de frecuencias de tareas | Sí | No | No |
 | Movimientos / Pedidos / Compras / Proveedores | Sí | Sí | No |
-| Auditoría y plantilla de 84 criterios | Sí | No | No |
+| Auditoría y plantilla de 84 criterios (realizar, guardar y cerrar) | Sí | Sí | No |
 | Catálogo y gestión de usuarios | Sí | No | No |
 | Entrevistas | Sí | No | No |
 
@@ -125,7 +130,7 @@ app/tareas/[area]/[fecha]      carga diaria y actualización de ocurrencias
 app/tareas/semana             resumen semanal por área: diarias por día y semanales
 app/pedidos                   historial persistido con estados, filtros y exportación WhatsApp
 app/movimientos               ingresos y egresos
-app/auditorias                auditoría diaria del dueño e historial
+app/auditorias                auditoría diaria e historial (dueño y encargados)
 app/entrevistas               evaluaciones prácticas privadas del dueño
 app/admin                     hub del dueño y estado de pendientes
 app/admin/catalogo            ABM de productos: nombre, categoría, unidad, objetivos
@@ -172,6 +177,9 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 8. `010_planillas_admin_compras.sql`: archivado y orden de planillas, RPCs de ABM y compra atómica con movimiento.
 9. `011_restore_unique_unarchive.sql`: restaura unicidades de upsert y reactiva filas archivadas en lugar de reinsertarlas.
 10. `012_frecuencias_tareas.sql`: frecuencia por ocurrencia, registro semanal único y derivación de referencias inequívocas.
+11. `013_auditorias_encargado.sql`: auditorías realizables y cerrables por dueño y encargados, con RLS y RPCs compartidas.
+12. `014_reapertura_auditorias.sql`: reapertura con motivo obligatorio y bitácora `auditoria_entregas` por cada cierre.
+13. `015_entrevistas_finalizar.sql`: estado FINALIZADA congelado, reabrible con motivo, y búsqueda del historial.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
 

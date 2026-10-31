@@ -21,21 +21,24 @@ Objetivo: dejar la app lista para uso real del equipo, en orden de valor operati
 | B2 · Cierre/reapertura de planillas ✔ | estado CERRADO bloquea edición; dueño puede reabrir con motivo auditado; protección en BD (triggers 009) + `/hoy` muestra "Cerrado" | ✔ checks DB (rechazos y permisos) + smoke DUEÑO cierra/reabre |
 | B3 · Progreso de tareas en `/hoy` ✔ | agregado de tareas Cocina/Salón en el resumen diario | ✔ contador por área con barra accesible; smoke 3 roles verifica 1/N en tareas y la barra en `/hoy` |
 | B4 · Programador de frecuencias ✔ | frecuencia por ocurrencia (DIARIA/SEMANAL/SEGUN_NECESIDAD), cálculo por semana ISO, vista `/tareas/semana` y ABM `/admin/tareas` (migración 012) | ✔ 75 checks DB (registro semanal único, RLS, derivación) + smoke 3 roles (vista semanal y ABM del dueño) |
-| B5 · Historial de inventarios | por planilla: días pasados con estado completo/parcial/cerrado y navegación de fechas | se consulta cualquier día anterior sin conocer la URL |
-| B6 · Historial de movimientos con filtros | lista completa por fecha/producto/tipo (hoy sólo muestra los últimos 20) | filtros devuelven los mismos totales que la DB |
+| B5 · Historial de inventarios ✔ | por planilla: días pasados con estado completo/parcial/cerrado y navegación de fechas | ✔ lint/build + smoke: historial por planilla, estado y fecha; navegación sin URL |
+| B6 · Historial de movimientos con filtros ✔ | lista completa por fecha/producto/tipo (hoy sólo muestra los últimos 20) | ✔ lint/build + smoke: filtros por rango de fechas, producto, tipo; URL persistente; limpiar filtros |
 
 ## Fase C — Refinamiento de control
 
 | Tarea | Alcance | Aceptación |
 |---|---|---|
-| C1 · Reapertura de auditoría | sólo DUEÑO, con motivo registrado e inmutabilidad documentada | auditoría cerrada puede reabrirse con trazabilidad |
-| C2 · Estados de entrevistas | finalizar evaluación + búsqueda en historial | estado FINALIZADA distingue de borrador |
+| C1 · Reapertura de auditoría ✔ | reabrir con motivo obligatorio (5-500) para DUEÑO y ENCARGADO; entrega cerrada queda registrada en bitácora `auditoria_entregas` (firma, puntaje, quién/por qué reabrió); inmutabilidad del cierre intacta salvo desbloqueo (migración 014) | ✔ lint/build + 81 checks DB (rechazo de edición disfrazada de reapertura, motivo validado, doble entrega, corrección del ENCARGADO) |
+| C2 · Estados de entrevistas ✔ | botón Finalizar evaluación (exige decisión cargada); estado FINALIZADA congela filas y respuestas en BD; reabrir con motivo obligatorio (5-500) deja editar de nuevo; búsqueda del historial por candidato/puesto (migración 015) | ✔ lint/build + 89 checks DB (finalizar sin decisión rechazado, congelado de fila y respuestas, doble cierre rechazado, reapertura con motivo y re-edición) |
+
+Nota (2026-10-31): migración `013_auditorias_encargado.sql` habilita a DUEÑO y ENCARGADO para realizar, guardar y cerrar auditorías. El DUEÑO conserva además el acceso de revisión desde `/admin`.
+Nota (2026-10-31): decisión del dueño — la reapertura de auditorías es para DUEÑO y ENCARGADO (no sólo el dueño), con motivo obligatorio y trazabilidad completa; implementada como C1.
 
 ## Fase D — Exportación (decisión tomada: PDF con PDFKit)
 
 | Tarea | Alcance | Aceptación |
 |---|---|---|
-| D1 · Export PDF por planilla/fecha | `/admin/exportaciones`: A4 vertical stock/tareas/bebidas/entrevistas; A4 horizontal auditoría; encabezados repetidos y paginación | PDF descargable con acentos y D/H |
+| D1 · Export PDF por planilla/fecha ✔ | `/admin/exportaciones`: A4 vertical stock/tareas/bebidas/entrevistas; A4 horizontal auditoría; encabezados repetidos y paginación | ✔ lint/build + smoke: descarga de PDF generable para stock, tareas, auditoría y entrevista |
 | D2 · XLSX analítica (opcional) | exportar compras/costos para análisis externo | opcional, después de D1 |
 
 ## Fase E — Analítica compras/costos (plan detallado en `Docs/hipolito-analitica-compras-costos.md`)
