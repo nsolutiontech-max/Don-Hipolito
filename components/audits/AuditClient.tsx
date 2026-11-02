@@ -38,6 +38,14 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
   const closed = audit?.estado === "CERRADO";
   const reopened = audit?.estado === "ABIERTO";
   const answered = criteria.filter(item => rows[item.id]?.resultado).length;
+  const missing = criteria.length - answered;
+  const pendingBlocks = (["COCINA", "SALON_GENERAL"] as const)
+    .filter(value => criteria.some(item => item.bloque === value && !rows[item.id]?.resultado))
+    .map(value => value === "COCINA" ? "Cocina" : "Salón / General");
+  const closeHint = [
+    missing ? `Faltan ${missing} criterios por responder${pendingBlocks.length ? ` (bloque ${pendingBlocks.join(" y ")})` : ""}` : "",
+    !signature.trim() ? "Escribe la firma o aclaración antes de cerrar." : "",
+  ].filter(Boolean).join(" · ");
   const ok = criteria.filter(item => rows[item.id]?.resultado === "OK").length;
   const failed = answered - ok;
 
@@ -234,8 +242,8 @@ export function AuditClient({ date, auditorName, audit, parts, responses, criter
       </section>
     </fieldset>
     {!closed && <div className="action-bar">
-      <p role="status" className={`mb-2 text-sm ${message.includes("No se") || message.includes("Faltan") ? "text-red-700" : "text-zinc-700"}`}>
-        {message || (dirty ? "Hay cambios pendientes de guardar" : "Puedes guardar parcialmente durante el día")}
+      <p role="status" className={`mb-2 text-sm ${message.includes("No se") || message.includes("Faltan") || closeHint.includes("Faltan") ? "text-red-700" : "text-zinc-700"}`}>
+        {message || closeHint || (dirty ? "Hay cambios pendientes de guardar" : "Puedes guardar parcialmente durante el día")}
       </p>
       {!confirmClose ? <div className="flex gap-2">
         <button type="button" className="button-primary flex-1" disabled={saving || closed} onClick={save}>{saving ? "Guardando…" : "Guardar borrador"}</button>

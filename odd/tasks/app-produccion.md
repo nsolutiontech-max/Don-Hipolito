@@ -66,6 +66,7 @@ Nota (2026-10-31): decisión del dueño — la reapertura de auditorías es para
 - `.env.local` ahora concentra credenciales por usuario (ignorado por git). No commitear ni copiar a memoria.
 - `CAMARERO_TEMP_PASSWORD` ya apunta a la clave definitiva; el nombre quedó como clave legado usada por scripts.
 - Smoke de navegador: extender con A1 una vez verificado build/lint.
+- Nota (2026-11-02): prueba de aceptación C1 en producción reveló que el cierre de auditoría quedaba deshabilitado sin motivo visible. `AuditClient` ahora muestra en la barra de acciones qué falta para cerrar (criterios pendientes por bloque y firma) mientras el botón permanece deshabilitado; sin cambio de permisos ni del RPC.
 
 ## Orden sugerido
 
