@@ -52,7 +52,7 @@ Este informe describe el estado actual del proyecto **Don Hipólito**, una plata
 | **B6** | **Historial de movimientos** – listado filtrado por fecha, producto o tipo (hoy muestra últimos 20). | – (pendiente). |
 | **D1** | Exportar PDF con PDFKit una vez que todas las hojas estén implementadas. | – (pendiente). |
 | **F1+F2** | Historias de inventario y movimientos, con filtros avanzados. | – (pendiente). |
-| **E1–E6** | Funcionalidades de inventario y gestión de productos. | – (pendiente). |
+| **E1–E6** | Funcionalidades de inventario y gestión de productos. E1 (normalización compras con unidades/conversiones, migración 016) y E2 (ranking de productos más comprados en `/admin/compras/ranking`, migración 017, exclusivo del dueño) están completos y en producción; E3–E6 pendientes. | E1 `f95c67e`, E2 (este commit), migraciones 016–017. |
 
 ## 7. Seguridad Detallada
 - **RLS**: Cada tabla (`actividades`, `actividad_programaciones`, `actividad_registros`, `inventarios`, `planilla_items`, etc.) tiene políticas que limitan la visibilidad según el rol y el área. Por ejemplo, un CAMARERO solo ve actividades de `SALON` y no puede leer `actividades` de `COCINA`.
@@ -63,7 +63,7 @@ Este informe describe el estado actual del proyecto **Don Hipólito**, una plata
 ## 8. Consideraciones Técnicas Importantes
 - **Migraciones**: se ejecutan en orden, con checksum para evitar re-aplicación. La migración 012 se añadió después de validar que la tabla existía y que los tests la aceptan.
 - **Base de datos**: todas las consultas usan el mismo `supabaseServer`; los scripts de prueba usan una transacción que se revierte al final.
-- **Pruebas de integración**: `test-db.mjs` verifica 75 casos, incluyendo la nueva lógica de frecuencia semanal y la capacidad de un CAMARERO para completar una tarea semanal sin crear registros duplicados.
+- **Pruebas de integración**: `test-db.mjs` verifica 118 checks, incluyendo permisos (CAMARERO, ENCARGADO, DUEÑO), frecuencias semanales, reaperturas de auditorías, conversiones de compra y el ranking de productos comprados.
 - **Pruebas de UI**: `browser-smoke.mjs` verifica que la barra de progreso sea verde claro, que la barra se vea en `/hoy` y que los tests de tareas y de auditoría pasen sin errores.
 
 ## 9. Próximos pasos (B5–B6–D1–F–E)

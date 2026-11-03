@@ -15,6 +15,8 @@ export default async function AdminPage() {
         <h2>Entrevistas prácticas</h2><p className="mt-2 text-sm text-zinc-600">Evaluación privada por candidato con decisión final.</p></Link>
       <Link className="panel hover:border-emerald-600" href="/admin/compras"><p className="eyebrow">Gestión</p>
         <h2>Compras</h2><p className="mt-2 text-sm text-zinc-600">Registro de compras con precio, unidad y proveedor; cada compra genera su ingreso al stock.</p></Link>
+      <Link className="panel hover:border-emerald-600" href="/admin/compras/ranking"><p className="eyebrow">Análisis</p>
+        <h2>Ranking de compras</h2><p className="mt-2 text-sm text-zinc-600">Qué productos concentran el gasto, con cantidad base, frecuencia y cobertura de datos. Exclusivo del dueño.</p></Link>
       <Link className="panel hover:border-emerald-600" href="/admin/proveedores"><p className="eyebrow">Gestión</p>
         <h2>Proveedores</h2><p className="mt-2 text-sm text-zinc-600">Altas, contacto y estado de los proveedores activos.</p></Link>
       <div className="panel" aria-disabled="true"><p className="eyebrow">Planificado</p><h2>Exportar e imprimir</h2>

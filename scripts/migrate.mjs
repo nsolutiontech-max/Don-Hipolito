@@ -22,6 +22,7 @@ export const files = [
   'supabase/migrations/014_reapertura_auditorias.sql',
   'supabase/migrations/015_entrevistas_finalizar.sql',
   'supabase/migrations/016_compras_unidades.sql',
+  'supabase/migrations/017_ranking_compras.sql',
 ];
 
 const db = await connectDatabase();

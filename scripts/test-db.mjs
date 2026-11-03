@@ -75,6 +75,8 @@ try {
     exists(select 1 from information_schema.columns where table_name='compras' and column_name='factor_a_base') as has_factor");
   if (!purchaseUnits.rows[0].present || !purchaseUnits.rows[0].has_factor)
     await db.query(readFileSync('supabase/migrations/016_compras_unidades.sql', 'utf8'));
+  const rankingRpc = await db.query("select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace\n    where n.nspname = 'public' and p.proname = 'ranking_compras'");
+  if (!rankingRpc.rowCount) await db.query(readFileSync('supabase/migrations/017_ranking_compras.sql', 'utf8'));
   const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
   await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
   check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
@@ -426,6 +428,47 @@ try {
     /not found/i, 'Removing an absent conversion is rejected');
   check((await db.query('select 1 from public.producto_unidades_compra where producto_id=$1', [unProduct.id])).rowCount === 0,
     'The owner removes a confirmed conversion');
+  // Purchased-products ranking (migration 017 / E2).
+  await actingAs(ids.ENCARGADO);
+  await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [unProduct.id, proveedor, 1, 'CAJA', 24000, '2099-01-06T14:00:00Z']);
+  const gastoDirecto = Number((await db.query(
+    "select coalesce(sum(cantidad*precio_unitario),0) as total from public.compras\n      where fecha >= ($1::timestamp at time zone 'America/Argentina/Buenos_Aires')\n        and fecha < (($2::date + 1)::timestamp at time zone 'America/Argentina/Buenos_Aires')",
+    ['2099-01-01', '2099-01-31'])).rows[0].total);
+  await actingAs(ids['DUEÑO']);
+  const rank = (await db.query('select * from public.ranking_compras($1::date,$2::date,null,null,null)',
+    ['2099-01-01', '2099-01-31'])).rows;
+  const totalRanking = rank.reduce((suma, fila) => suma + Number(fila.gasto_ars), 0);
+  check(Math.abs(totalRanking - gastoDirecto) < 0.01,
+    'Ranking spend equals the sum of the recorded purchases');
+  const participacion = rank.reduce((suma, fila) => suma + Number(fila.participacion_pct ?? 0), 0);
+  check(rank.length > 0 && Math.abs(participacion - 100) < 0.05,
+    'Participation adds up to a full 100 percent');
+  const filaUN = rank.find(fila => fila.producto_id === unProduct.id);
+  check(filaUN && Number(filaUN.gasto_ars) === 100000,
+    'The fixture product spend is exact');
+  check(filaUN && Number(filaUN.cantidad_base) === 85,
+    'Base quantity excludes the unconfirmed box purchase');
+  check(filaUN && Number(filaUN.lineas_incompletas) === 1 && Number(filaUN.lineas_completas) === 3
+    && Number(filaUN.compras) === 4,
+    'Confirmed and incomplete lines are counted separately');
+  const ventanaVacia = Number((await db.query("select count(*) as n from public.ranking_compras('2098-01-01'::date,'2098-12-31'::date,null,null,null)")).rows[0].n);
+  check(ventanaVacia === 0, 'An empty period returns no rows');
+  const proveedorInexistente = await db.query('select * from public.ranking_compras($1::date,$2::date,null,null,$3::uuid)',
+    ['2099-01-01', '2099-01-31', randomUUID()]);
+  check(proveedorInexistente.rowCount === 0, 'An unknown provider returns no rows');
+  const categoriaUn = (await db.query('select categoria_id from public.productos where id=$1',
+    [unProduct.id])).rows[0].categoria_id;
+  const esperados = Number((await db.query(
+    "select count(distinct p.id) as n from public.compras c join public.productos p on p.id = c.producto_id\n      where p.categoria_id = $1 and c.fecha >= ($2::timestamp at time zone 'America/Argentina/Buenos_Aires')\n        and c.fecha < (($3::date + 1)::timestamp at time zone 'America/Argentina/Buenos_Aires')",
+    [categoriaUn, '2099-01-01', '2099-01-31'])).rows[0].n);
+  const catRank = await db.query('select producto_id from public.ranking_compras($1::date,$2::date,$3::uuid,null,null)',
+    ['2099-01-01', '2099-01-31', categoriaUn]);
+  check(catRank.rows.length === esperados, 'Category filter returns exactly the matching products');
+  await actingAs(ids.ENCARGADO);
+  await denied("select * from public.ranking_compras('2099-01-01'::date,'2099-01-31'::date,null,null,null)", []);
+  await actingAs(ids.CAMARERO);
+  await denied("select * from public.ranking_compras('2099-01-01'::date,'2099-01-31'::date,null,null,null)", []);
   await actingAs(ids['DUEÑO']);
   const proveedorEditado = await db.query("update public.proveedores set telefono='555-0202',activo=false where id=$1", [proveedor]);
   check(proveedorEditado.rowCount === 1, 'Owner edits and deactivates a provider');

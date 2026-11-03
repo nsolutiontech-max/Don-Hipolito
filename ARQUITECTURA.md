@@ -181,6 +181,7 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 12. `014_reapertura_auditorias.sql`: reapertura con motivo obligatorio y bitácora `auditoria_entregas` por cada cierre.
 13. `015_entrevistas_finalizar.sql`: estado FINALIZADA congelado, reabrible con motivo, y búsqueda del historial.
 14. `016_compras_unidades.sql`: moneda ARS, factor de conversión y cantidad base por compra, catálogo de conversiones confirmadas por el dueño, bandeja de datos incompletos con corrección manual, y grants explícitos de Data API en la misma migración (Supabase dejó de auto-otorgarlos a tablas nuevas desde 2026-10-30).
+15. `017_ranking_compras.sql`: RPC `ranking_compras` (solo dueño) con gasto ARS, participación, cantidad base sin mezclar unidades, frecuencia, cobertura de datos y filtros por rango/categoría/producto/proveedor; la página `/admin/compras/ranking` agrega y muestra el análisis con gráfico y tabla accesible.
 
 `scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos; el checksum normaliza fines de línea (LF) para tolerar checkouts con CRLF. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones. **Toda migración que cree tablas en `public` debe incluir sus `grant` explícitos** (select/insert/update/delete para `authenticated`, `all` para `service_role`).
 

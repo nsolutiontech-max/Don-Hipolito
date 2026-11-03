@@ -46,7 +46,7 @@ Nota (2026-10-31): decisión del dueño — la reapertura de auditorías es para
 | Tarea | Referencia | Nota |
 |---|---|---|
 | E1 · T15 compras/unidades/conversiones ✔ | migración 016: moneda ARS, factor de conversión, cantidad base, catálogo de conversiones confirmadas por el dueño y bandeja de datos incompletos con corrección manual; formulario muestra el factor confirmado o advierte que quedará incompleto | ✔ 108/108 checks DB (caja 24 UN vs compra por unidad comparables, repetidas permitidas, incompletas señaladas y corregidas por el dueño, RLS por rol y grants explícitos) + lint/build + aplicar 016 a producción |
-| E2 | T16 ranking productos más comprados | gasto, cantidad base, frecuencia |
+| E2 · T16 ranking productos más comprados ✔ | `/admin/compras/ranking` (solo dueño): gastos ARS, participación, cantidad base por producto (sin mezclar unidades), frecuencia, cobertura de datos incompletos; filtros por rango/categoría/producto/proveedor; migración 017 con la RPC `ranking_compras` y totales calculados en PostgreSQL | ✔ 118/118 checks DB (gasto coincide con la suma directa de compras, participación suma 100 %, compras sin conversión cuentan al gasto pero no a la base, filtro por categoría/proveedor, ENCARGADO/CAMARERO reciben 42501) + lint/build + aplicar 017 a producción |
 | E3 | T17 evolución semanal/mensual + proveedores | costo ponderado, no promedio simple |
 | E4 | T18 recetas versionadas + motor de costos | merma y rendimiento |
 | E5 | T19 simulador food cost / precio venta | costo $300 → objetivo 30% = $1.000 |
