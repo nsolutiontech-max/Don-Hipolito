@@ -71,6 +71,10 @@ try {
   if (!planillaUnique.rowCount) await db.query(readFileSync('supabase/migrations/011_restore_unique_unarchive.sql', 'utf8'));
   const frecuenciaColumn = await db.query("select 1 from information_schema.columns where table_name='actividad_programaciones' and column_name='frecuencia'");
   if (!frecuenciaColumn.rowCount) await db.query(readFileSync('supabase/migrations/012_frecuencias_tareas.sql', 'utf8'));
+  const purchaseUnits = await db.query("select to_regclass('public.producto_unidades_compra') as present,\
+    exists(select 1 from information_schema.columns where table_name='compras' and column_name='factor_a_base') as has_factor");
+  if (!purchaseUnits.rows[0].present || !purchaseUnits.rows[0].has_factor)
+    await db.query(readFileSync('supabase/migrations/016_compras_unidades.sql', 'utf8'));
   const targetProduct = (await db.query('select id from public.productos order by id limit 1')).rows[0].id;
   await db.query('update public.productos set stock_ideal = 12.34 where id=$1', [targetProduct]);
   check((await db.query('select objetivo_confirmado from public.productos where id=$1', [targetProduct])).rows[0].objetivo_confirmado,
@@ -355,6 +359,73 @@ try {
   await denied('select public.registrar_compra($1,$2,$3,$4,$5,$6)',
     [stock, proveedor, 1, 'KG', 10, '2099-01-06T10:00:00Z']);
   await denied("insert into public.proveedores(nombre) values ('Proveedor Clandestino')");
+  // Purchases with units, money and confirmed conversions (migration 016).
+  check((await db.query('select * from public.producto_unidades_compra')).rowCount === 0,
+    'CAMARERO cannot read the conversion catalogue');
+  await denied('select public.confirmar_conversion_compra($1,$2,$3)', [stock, 'CAJA', 24]);
+  await denied('select public.corregir_compra_incompleta($1,$2)', [compraUno, 5]);
+  await actingAs(ids['DUEÑO']);
+  const unProduct = (await db.query("select id,unidad_medida from public.productos where unidad_medida='UN' and activo limit 1")).rows[0];
+  check(unProduct && unProduct.unidad_medida === 'UN', 'A base-unit UN product exists for conversion tests');
+  await fails('select public.confirmar_conversion_compra($1,$2,$3)', [unProduct.id, 'CAJA', 0],
+    /Invalid factor/i, 'A conversion factor must be positive and bounded');
+  await fails('select public.confirmar_conversion_compra($1,$2,$3)', [unProduct.id, 'UN', 24],
+    /must differ/i, 'A conversion cannot target the product base unit');
+  const porDefinir = (await db.query("select id from public.productos where unidad_medida='POR_DEFINIR' and activo limit 1")).rows[0];
+  if (porDefinir) await fails('select public.confirmar_conversion_compra($1,$2,$3)', [porDefinir.id, 'CAJA', 10],
+    /no base unit/i, 'A product without base unit cannot hold conversions yet');
+  await db.query('select public.confirmar_conversion_compra($1,$2,$3)', [unProduct.id, 'CAJA', 24]);
+  const conversionRow = (await db.query('select factor_a_base,confirmada_por from public.producto_unidades_compra where producto_id=$1 and unidad=$2',
+    [unProduct.id, 'CAJA'])).rows[0];
+  check(Number(conversionRow.factor_a_base) === 24 && conversionRow.confirmada_por === ids['DUEÑO'],
+    'The owner confirms the box conversion with their identity');
+  await actingAs(ids.ENCARGADO);
+  await denied('select public.corregir_compra_incompleta($1,$2)', [compraUno, 5]);
+  const compraCaja = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [unProduct.id, proveedor, 2, 'CAJA', 24000, '2099-01-06T11:00:00Z'])).rows[0].id;
+  const compraUnidad = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [unProduct.id, proveedor, 1, 'UN', 1000, '2099-01-06T11:05:00Z'])).rows[0].id;
+  const bases = (await db.query('select id,factor_a_base,cantidad_base,moneda from public.compras where id=any($1::uuid[])',
+    [[compraCaja, compraUnidad]])).rows;
+  const baseCaja = bases.find(row => row.id === compraCaja);
+  const baseUnidad = bases.find(row => row.id === compraUnidad);
+  check(Number(baseCaja.factor_a_base) === 24 && Number(baseCaja.cantidad_base) === 48
+    && Number(baseUnidad.factor_a_base) === 1 && Number(baseUnidad.cantidad_base) === 1
+    && baseCaja.moneda === 'ARS' && baseUnidad.moneda === 'ARS',
+    'Box and unit purchases store comparable base quantities in ARS');
+  await actingAs(ids['DUEÑO']);
+  await db.query('select public.confirmar_conversion_compra($1,$2,$3)', [unProduct.id, 'CAJA', 48]);
+  check(Number((await db.query('select factor_a_base from public.compras where id=$1', [compraCaja])).rows[0].factor_a_base) === 24,
+    'Re-confirming conversions keeps the stored purchase evidence');
+  await actingAs(ids.ENCARGADO);
+  const compraIncompleta = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+    [unProduct.id, proveedor, 3, 'ATADO', 9000, '2099-01-06T12:00:00Z'])).rows[0].id;
+  if (porDefinir) {
+    const porDefinirCompra = (await db.query('select public.registrar_compra($1,$2,$3,$4,$5,$6) as id',
+      [porDefinir.id, proveedor, 1, 'UN', 500, '2099-01-06T13:00:00Z'])).rows[0].id;
+    const porDefinirRow = (await db.query('select factor_a_base,cantidad_base from public.compras where id=$1', [porDefinirCompra])).rows[0];
+    check(porDefinirRow.factor_a_base === null && porDefinirRow.cantidad_base === null,
+      'Purchases for POR_DEFINIR products stay as incomplete data');
+  }
+  const incompleteRow = (await db.query('select factor_a_base,cantidad_base from public.compras where id=$1', [compraIncompleta])).rows[0];
+  check(incompleteRow.factor_a_base === null && incompleteRow.cantidad_base === null,
+    'Purchases without a confirmed conversion stay as incomplete data');
+  await actingAs(ids['DUEÑO']);
+  await fails('select public.corregir_compra_incompleta($1,$2)', [compraIncompleta, 0],
+    /Invalid factor/i, 'A manual review still demands a positive factor');
+  await fails('select public.corregir_compra_incompleta($1,$2)', [randomUUID(), 12],
+    /not found/i, 'Manual review rejects unknown purchases');
+  await db.query('select public.corregir_compra_incompleta($1,$2)', [compraIncompleta, 12]);
+  const correctedPurchase = (await db.query('select factor_a_base,cantidad_base from public.compras where id=$1', [compraIncompleta])).rows[0];
+  check(Number(correctedPurchase.factor_a_base) === 12 && Number(correctedPurchase.cantidad_base) === 36,
+    'Owner review states the factor as evidence and derives the base quantity');
+  await fails("insert into public.compras(producto_id,proveedor_id,fecha,cantidad,unidad_medida,precio_unitario,moneda) values ($1,$2,now(),1,'UN',1,'USD')",
+    [unProduct.id, proveedor], /compras_moneda_check/i, 'Purchases only accept ARS');
+  await db.query('select public.quitar_conversion_compra($1,$2)', [unProduct.id, 'CAJA']);
+  await fails('select public.quitar_conversion_compra($1,$2)', [unProduct.id, 'CAJA'],
+    /not found/i, 'Removing an absent conversion is rejected');
+  check((await db.query('select 1 from public.producto_unidades_compra where producto_id=$1', [unProduct.id])).rowCount === 0,
+    'The owner removes a confirmed conversion');
   await actingAs(ids['DUEÑO']);
   const proveedorEditado = await db.query("update public.proveedores set telefono='555-0202',activo=false where id=$1", [proveedor]);
   check(proveedorEditado.rowCount === 1, 'Owner edits and deactivates a provider');

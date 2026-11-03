@@ -45,7 +45,7 @@ Nota (2026-10-31): decisión del dueño — la reapertura de auditorías es para
 
 | Tarea | Referencia | Nota |
 |---|---|---|
-| E1 | T15 compras/unidades/conversiones | previo a rankings y costos |
+| E1 · T15 compras/unidades/conversiones ✔ | migración 016: moneda ARS, factor de conversión, cantidad base, catálogo de conversiones confirmadas por el dueño y bandeja de datos incompletos con corrección manual; formulario muestra el factor confirmado o advierte que quedará incompleto | ✔ 108/108 checks DB (caja 24 UN vs compra por unidad comparables, repetidas permitidas, incompletas señaladas y corregidas por el dueño, RLS por rol y grants explícitos) + lint/build + aplicar 016 a producción |
 | E2 | T16 ranking productos más comprados | gasto, cantidad base, frecuencia |
 | E3 | T17 evolución semanal/mensual + proveedores | costo ponderado, no promedio simple |
 | E4 | T18 recetas versionadas + motor de costos | merma y rendimiento |

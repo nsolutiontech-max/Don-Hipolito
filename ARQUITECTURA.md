@@ -180,8 +180,9 @@ Migraciones nuevas ya aplicadas en `rceoboibijmwtxmevash`:
 11. `013_auditorias_encargado.sql`: auditorías realizables y cerrables por dueño y encargados, con RLS y RPCs compartidas.
 12. `014_reapertura_auditorias.sql`: reapertura con motivo obligatorio y bitácora `auditoria_entregas` por cada cierre.
 13. `015_entrevistas_finalizar.sql`: estado FINALIZADA congelado, reabrible con motivo, y búsqueda del historial.
+14. `016_compras_unidades.sql`: moneda ARS, factor de conversión y cantidad base por compra, catálogo de conversiones confirmadas por el dueño, bandeja de datos incompletos con corrección manual, y grants explícitos de Data API en la misma migración (Supabase dejó de auto-otorgarlos a tablas nuevas desde 2026-10-30).
 
-`scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones.
+`scripts/migrate.mjs` usa una transacción, un bloqueo asesor y checksums en `private.app_migrations`. Omite archivos ya aplicados y rechaza que se cambien sus contenidos; el checksum normaliza fines de línea (LF) para tolerar checkouts con CRLF. **No volver a ejecutar los seeds legados 1/2**: contienen nombres e ideales estimados anteriores. Para cambios posteriores, agregar nuevas migraciones. **Toda migración que cree tablas en `public` debe incluir sus `grant` explícitos** (select/insert/update/delete para `authenticated`, `all` para `service_role`).
 
 La migración 003 rechaza una instalación que ya tenga inventarios por turno: no elimina ni fusiona registros históricos por su cuenta. El repositorio actual se migró desde cero inventarios.
 

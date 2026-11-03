@@ -13,6 +13,7 @@ export type Compra = {
   id: string; producto_id: string; proveedor_id: string | null; fecha: string;
   cantidad: number; unidad_medida: string; precio_unitario: number;
   responsable_id: string | null; movimiento_id: string | null;
+  moneda?: string; factor_a_base?: number | null; cantidad_base?: number | null;
 };
 export type DetalleConteo = {
   producto_id: string; ubicacion: Location; stock_real: number | null;

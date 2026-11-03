@@ -21,6 +21,7 @@ export const files = [
   'supabase/migrations/013_auditorias_encargado.sql',
   'supabase/migrations/014_reapertura_auditorias.sql',
   'supabase/migrations/015_entrevistas_finalizar.sql',
+  'supabase/migrations/016_compras_unidades.sql',
 ];
 
 const db = await connectDatabase();
@@ -30,8 +31,10 @@ try {
   await db.query('create schema if not exists private');
   await db.query('create table if not exists private.app_migrations(path text primary key, checksum text not null, applied_at timestamptz not null default now())');
   for (const path of files) {
+    // Hash line-ending normalized content: git checkouts may flip EOL between
+    // checkouts, and migration content itself is what the ledger must guard.
     const sql = readFileSync(path, 'utf8');
-    const checksum = createHash('sha256').update(sql).digest('hex');
+    const checksum = createHash('sha256').update(sql.replace(/\r\n/g, '\n'), 'utf8').digest('hex');
     const previous = await db.query('select checksum from private.app_migrations where path=$1', [path]);
     if (previous.rowCount) {
       if (previous.rows[0].checksum !== checksum) throw new Error(`Applied migration changed: ${path}`);
